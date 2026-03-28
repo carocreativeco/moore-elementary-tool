@@ -193,11 +193,11 @@
 
     .page-header-logo {
       height: 62px;
+      min-width: 72px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      min-width: 72px;
     }
 
     .page-header-logo img {
@@ -589,7 +589,7 @@
       <div id="page">
         <div class="page-header">
           <div class="page-header-logo" id="pageLogoWrap">
-            <img src="moore-tool.png" alt="Moore Elementary Logo" onerror="this.outerHTML='<span class=&quot;initials&quot;>ME</span>';">
+            <img src="moore-tool.png" alt="Moore Elementary Logo" />
           </div>
           <div class="page-header-text">
             <div class="school-name">Moore Elementary School</div>
@@ -660,17 +660,12 @@
     });
 
     function updatePreview() {
-      var titleEl = document.getElementById('annTitle');
-      var docTypeEl = document.getElementById('docType');
-      var docDateEl = document.getElementById('docDate');
-      var rawEl = document.getElementById('rawContent');
-      var sigNameEl = document.getElementById('sigName');
-      var sigTitleEl = document.getElementById('sigTitle');
-
-      var title = titleEl.value.trim();
-      var docType = docTypeEl.value;
-      var rawDate = docDateEl.value;
-      var raw = rawEl.value;
+      var title = document.getElementById('annTitle').value.trim();
+      var docType = document.getElementById('docType').value;
+      var rawDate = document.getElementById('docDate').value;
+      var raw = document.getElementById('rawContent').value;
+      var sigName = document.getElementById('sigName').value.trim();
+      var sigTitle = document.getElementById('sigTitle').value.trim();
 
       document.getElementById('pageTitle').textContent = title || 'Your Announcement Title';
       document.getElementById('pageDocTypeBadge').textContent = docType;
@@ -689,8 +684,6 @@
         document.getElementById('pageDocDate').textContent = '';
       }
 
-      var sigName = sigNameEl.value.trim();
-      var sigTitle = sigTitleEl.value.trim();
       var sigBlock = document.getElementById('pageSignature');
       var sigDisplay = document.getElementById('sigDisplay');
       var sigTitleDisplay = document.getElementById('sigTitleDisplay');
