@@ -109,42 +109,6 @@
       line-height: 1.6;
     }
 
-    .logo-upload-area {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 18px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-      background: var(--bg);
-    }
-
-    .logo-upload-area:hover {
-      border-color: var(--gold);
-      background: #fffdf0;
-    }
-
-    .logo-upload-area input { display: none; }
-
-    .logo-upload-area img {
-      max-height: 64px;
-      max-width: 100%;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto 8px;
-    }
-
-    .logo-upload-area p {
-      font-size: .78rem;
-      color: #888;
-    }
-
-    .logo-upload-area .upload-icon {
-      font-size: 1.8rem;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
     .actions {
       padding: 16px 20px;
       display: flex;
@@ -233,12 +197,14 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      min-width: 72px;
     }
 
     .page-header-logo img {
       height: 62px;
       max-width: 120px;
       object-fit: contain;
+      display: block;
     }
 
     .page-header-logo .initials {
@@ -553,17 +519,6 @@
     <div class="panel">
 
       <div class="panel-section">
-        <label>School Logo</label>
-        <div class="logo-upload-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
-          <input type="file" id="logoInput" accept="image/*" />
-          <div id="logoPreviewContainer">
-            <div class="upload-icon">&#127983;</div>
-            <p>Click to upload your logo<br /><em>PNG, JPG, SVG supported</em></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel-section">
         <label>Announcement Title</label>
         <input type="text" id="annTitle" placeholder="e.g. Spring Field Day 2025" />
       </div>
@@ -591,7 +546,8 @@
         <textarea id="rawContent"></textarea>
         <p class="hint">
           Supports plain text, basic Markdown shortcuts, pipe-separated tables, and hyperlinks.<br>
-          Hyperlink format: <strong>[link text](https://example.com)</strong>
+          Use links like: <strong>[School Website](https://example.com)</strong><br>
+          You can also paste full URLs like: <strong>https://example.com</strong>
         </p>
       </div>
 
@@ -633,7 +589,7 @@
       <div id="page">
         <div class="page-header">
           <div class="page-header-logo" id="pageLogoWrap">
-            <span class="initials">ME</span>
+            <img src="moore-tool.png" alt="Moore Elementary Logo" onerror="this.outerHTML='<span class=&quot;initials&quot;>ME</span>';">
           </div>
           <div class="page-header-text">
             <div class="school-name">Moore Elementary School</div>
@@ -682,8 +638,6 @@
   </div>
 
   <script>
-    var logoDataURL = null;
-
     document.addEventListener('DOMContentLoaded', function () {
       var docDate = document.getElementById('docDate');
       var rawContent = document.getElementById('rawContent');
@@ -691,10 +645,9 @@
       var docType = document.getElementById('docType');
       var sigName = document.getElementById('sigName');
       var sigTitle = document.getElementById('sigTitle');
-      var logoInput = document.getElementById('logoInput');
 
       docDate.valueAsDate = new Date();
-      rawContent.placeholder = 'Paste your text here...\n\nTips:\n- Lines ending with : become headers\n- Lines starting with - become bullets\n- Use **bold** for bold text\n- Lines starting with 1. become numbered circles\n- Prefix a line with ! for a callout box\n- Add links like [School Website](https://example.com)';
+      rawContent.placeholder = 'Paste your text here...\n\nTips:\n- Lines ending with : become headers\n- Lines starting with - become bullets\n- Use **bold** for bold text\n- Lines starting with 1. become numbered circles\n- Prefix a line with ! for a callout box\n- Add links like [School Website](https://example.com)\n- Or paste full URLs like https://example.com';
 
       annTitle.addEventListener('input', updatePreview);
       docType.addEventListener('change', updatePreview);
@@ -702,25 +655,9 @@
       rawContent.addEventListener('input', updatePreview);
       sigName.addEventListener('input', updatePreview);
       sigTitle.addEventListener('input', updatePreview);
-      logoInput.addEventListener('change', handleLogoUpload);
 
       updatePreview();
     });
-
-    function handleLogoUpload(e) {
-      var file = e.target.files[0];
-      if (!file) return;
-
-      var reader = new FileReader();
-      reader.onload = function (ev) {
-        logoDataURL = ev.target.result;
-        document.getElementById('logoPreviewContainer').innerHTML =
-          '<img src="' + logoDataURL + '" alt="Logo" /><p style="font-size:.72rem;color:#888">Click to change</p>';
-        document.getElementById('pageLogoWrap').innerHTML =
-          '<img src="' + logoDataURL + '" alt="School Logo" />';
-      };
-      reader.readAsDataURL(file);
-    }
 
     function updatePreview() {
       var titleEl = document.getElementById('annTitle');
@@ -729,8 +666,6 @@
       var rawEl = document.getElementById('rawContent');
       var sigNameEl = document.getElementById('sigName');
       var sigTitleEl = document.getElementById('sigTitle');
-
-      if (!titleEl || !docTypeEl || !docDateEl || !rawEl || !sigNameEl || !sigTitleEl) return;
 
       var title = titleEl.value.trim();
       var docType = docTypeEl.value;
@@ -789,6 +724,35 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function formatInline(text) {
+      var placeholders = [];
+      var safeText = escapeHTML(text);
+
+      safeText = safeText.replace(/$$([^$$]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/gi, function(match, label, url) {
+        var token = '%%LINK' + placeholders.length + '%%';
+        placeholders.push('<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+        return token;
+      });
+
+      safeText = safeText.replace(/(^|[\s(>])((https?:\/\/[^\s<]+))/gi, function(match, prefix, url) {
+        var cleanUrl = url.replace(/[.,!?;:]+$/, '');
+        var trailing = url.slice(cleanUrl.length);
+        var token = '%%LINK' + placeholders.length + '%%';
+        placeholders.push('<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer">' + cleanUrl + '</a>');
+        return prefix + token + trailing;
+      });
+
+      safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>');
+      safeText = safeText.replace(/\*(.*?)\*/g, '<em>\$1</em>');
+      safeText = safeText.replace(/`(.*?)`/g, '<code>\$1</code>');
+
+      safeText = safeText.replace(/%%LINK(\d+)%%/g, function(match, index) {
+        return placeholders[Number(index)];
+      });
+
+      return safeText;
     }
 
     function parseContent(text) {
@@ -905,21 +869,6 @@
       return html;
     }
 
-    function formatInline(text) {
-      text = escapeHTML(text);
-
-      text = text.replace(
-        /$$([^$$]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,
-        '<a href="\$2" target="_blank" rel="noopener noreferrer">\$1</a>'
-      );
-
-      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>');
-      text = text.replace(/\*(.*?)\*/g, '<em>\$1</em>');
-      text = text.replace(/`(.*?)`/g, '<code>\$1</code>');
-
-      return text;
-    }
-
     function downloadPDF() {
       var pageEl = document.getElementById('page');
       var printWin = window.open('', '_blank', 'width=800,height=1000');
@@ -951,13 +900,6 @@
       document.getElementById('docDate').valueAsDate = new Date();
       document.getElementById('sigName').value = '';
       document.getElementById('sigTitle').value = '';
-      document.getElementById('logoInput').value = '';
-
-      logoDataURL = null;
-      document.getElementById('pageLogoWrap').innerHTML = '<span class="initials">ME</span>';
-      document.getElementById('logoPreviewContainer').innerHTML =
-        '<div class="upload-icon">&#127983;</div><p>Click to upload your logo<br/><em>PNG, JPG, SVG supported</em></p>';
-
       updatePreview();
     }
   </script>
