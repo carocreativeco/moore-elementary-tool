@@ -105,7 +105,7 @@
 
     .panel-section textarea {
       resize: vertical;
-      min-height: 240px;
+      min-height: 260px;
       line-height: 1.6;
     }
 
@@ -134,6 +134,13 @@
 
     .mini-btn:hover {
       opacity: .9;
+    }
+
+    .hint {
+      font-size: .73rem;
+      color: #888;
+      margin-top: 6px;
+      line-height: 1.5;
     }
 
     .actions {
@@ -169,13 +176,6 @@
     .btn-secondary {
       background: var(--gold);
       color: var(--navy);
-    }
-
-    .hint {
-      font-size: .73rem;
-      color: #888;
-      margin-top: 6px;
-      line-height: 1.5;
     }
 
     .preview-wrap {
@@ -384,7 +384,7 @@
 
     .doc-content th {
       background: var(--navy);
-      color: white;
+      color: var(--white);
       font-weight: 600;
       text-align: left;
       padding: 7px 10px;
@@ -437,6 +437,8 @@
 
     .signature-block {
       margin-top: 48px;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .sincerely {
@@ -486,6 +488,90 @@
     .support-footer a:hover {
       text-decoration: underline;
     }
+
+    .running-header {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: letter portrait;
+        margin: 0;
+      }
+
+      body {
+        background: white;
+      }
+
+      .app-bar,
+      .panel,
+      .preview-label,
+      .support-footer {
+        display: none !important;
+      }
+
+      .workspace {
+        display: block;
+        height: auto;
+      }
+
+      .preview-wrap {
+        padding: 0;
+        background: white;
+      }
+
+      #page {
+        width: 8.5in;
+        min-height: 11in;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding-top: 36px;
+      }
+
+      .running-header {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 8.5in;
+        height: 36px;
+        background: var(--navy);
+        color: var(--white);
+        padding: 0 32px;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 1000;
+      }
+
+      .running-title {
+        font-family: 'Noto Serif', serif;
+        font-size: .85rem;
+        font-weight: 700;
+      }
+
+      .running-date {
+        font-size: .7rem;
+        opacity: .7;
+      }
+
+      .page-header {
+        margin-top: -36px;
+        position: relative;
+        z-index: 1001;
+      }
+
+      .page-body {
+        padding: 30px 56px 36px;
+      }
+
+      .page-header,
+      .accent-bar,
+      .doc-type-row,
+      .page-footer {
+        break-inside: avoid;
+      }
+    }
   </style>
 </head>
 <body>
@@ -534,20 +620,12 @@
           <input type="text" id="linkURL" placeholder="URL (e.g. https://example.com)" />
           <button type="button" class="mini-btn full" onclick="insertLink()">Insert Link Into Content</button>
         </div>
-        <p class="hint">Place your cursor in the content box where you want the link to go, then use this builder.</p>
+        <p class="hint">Place your cursor inside the content box first, then click the button.</p>
       </div>
 
       <div class="panel-section">
         <label>Paste Your Content</label>
         <textarea id="rawContent"></textarea>
-        <p class="hint">
-          Formatting tips:<br>
-          - Lines ending with <strong>:</strong> become section headers<br>
-          - Lines starting with <strong>-</strong> become bullets<br>
-          - Lines starting with <strong>1.</strong> become numbered items<br>
-          - Use <strong>**bold**</strong> for bold text<br>
-          - Start a line with <strong>!</strong> for a callout box
-        </p>
       </div>
 
       <div class="panel-section">
@@ -570,6 +648,10 @@
       <div class="preview-label">Live Preview</div>
 
       <div id="page">
+        <div class="running-header">
+          <span class="running-title" id="runningTitle">Your Announcement Title</span>
+          <span class="running-date" id="runningDate"></span>
+        </div>
         <div class="page-header">
           <div class="page-header-logo">
             <img src="moore-tool.png" alt="Moore Elementary Logo" />
@@ -621,8 +703,16 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('docDate').valueAsDate = new Date();
+
       document.getElementById('rawContent').placeholder =
-        'Paste your text here...\n\nHello families,\n\nImportant Updates:\n- First item\n- Second item\n\n! This is a callout message';
+        'Paste your text here...\n\n' +
+        'Formatting tips:\n' +
+        '- Lines ending with : become section headers\n' +
+        '- Lines starting with - become bullets\n' +
+        '- Lines starting with 1. become numbered items\n' +
+        '- Use **bold** for bold text\n' +
+        '- Start a line with ! for a callout box\n' +
+        '- Use the Link Builder above to insert hyperlinks';
 
       ['annTitle', 'docType', 'docDate', 'rawContent', 'sigName', 'sigTitle'].forEach(function(id) {
         var el = document.getElementById(id);
@@ -641,19 +731,23 @@
       var sigTitle = document.getElementById('sigTitle').value.trim();
 
       document.getElementById('pageTitle').textContent = title || 'Your Announcement Title';
+      document.getElementById('runningTitle').textContent = title || 'Your Announcement Title';
       document.getElementById('pageDocTypeBadge').textContent = docType;
       document.getElementById('pageDocTypeTag').textContent = docType;
 
       if (rawDate) {
         var d = new Date(rawDate + 'T12:00:00');
-        document.getElementById('pageDocDate').textContent = d.toLocaleDateString('en-US', {
+        var formattedDate = d.toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         });
+        document.getElementById('pageDocDate').textContent = formattedDate;
+        document.getElementById('runningDate').textContent = formattedDate;
       } else {
         document.getElementById('pageDocDate').textContent = '';
+        document.getElementById('runningDate').textContent = '';
       }
 
       var sigBlock = document.getElementById('pageSignature');
@@ -668,13 +762,13 @@
           sigTitleDisplay.textContent = sigTitle.toUpperCase();
           sigTitleDisplay.style.display = 'block';
         } else {
-          sigTitleDisplay.style.display = 'none';
           sigTitleDisplay.textContent = '';
+          sigTitleDisplay.style.display = 'none';
         }
       } else {
         sigBlock.style.display = 'none';
-        sigTitleDisplay.style.display = 'none';
         sigTitleDisplay.textContent = '';
+        sigTitleDisplay.style.display = 'none';
       }
 
       document.getElementById('pageContent').innerHTML = raw.trim()
@@ -683,33 +777,12 @@
     }
 
     function escapeHTML(text) {
-      return text
+      return String(text)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
-    }
-
-    function formatInline(text) {
-      var placeholders = [];
-      var escaped = escapeHTML(text);
-
-      escaped = escaped.replace(/$$\[LINK:(.*?)\|(.*?)$$\]/g, function(match, label, url) {
-        var token = '%%LINK' + placeholders.length + '%%';
-        placeholders.push('<a href="' + escapeAttribute(url) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
-        return token;
-      });
-
-      escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>');
-      escaped = escaped.replace(/\*(.*?)\*/g, '<em>\$1</em>');
-      escaped = escaped.replace(/`(.*?)`/g, '<code>\$1</code>');
-
-      escaped = escaped.replace(/%%LINK(\d+)%%/g, function(match, i) {
-        return placeholders[Number(i)];
-      });
-
-      return escaped;
     }
 
     function escapeAttribute(text) {
@@ -720,13 +793,33 @@
         .replace(/>/g, '&gt;');
     }
 
+    function formatInline(text) {
+      var placeholders = [];
+      var escaped = escapeHTML(text);
+
+      escaped = escaped.replace(/\[\[LINK:(.*?)\|(.*?)\]\]/g, function(match, label, url) {
+        var token = '%%LINK' + placeholders.length + '%%';
+        placeholders.push('<a href="' + escapeAttribute(url) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+        return token;
+      });
+
+      escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      escaped = escaped.replace(/`(.*?)`/g, '<code>$1</code>');
+
+      escaped = escaped.replace(/%%LINK(\d+)%%/g, function(match, i) {
+        return placeholders[Number(i)];
+      });
+
+      return escaped;
+    }
+
     function parseContent(text) {
       var lines = text.split('\n');
       var html = '';
       var inList = false;
       var listType = '';
       var tableBuffer = [];
-      var olCounter = 0;
 
       function flushList() {
         if (!inList) return;
@@ -803,16 +896,17 @@
           continue;
         }
 
-        if (/^\d+[.)]\s/.test(trimmed)) {
+        var olMatch = trimmed.match(/^(\d+)[.)]\s(.*)$/);
+        if (olMatch) {
+          var itemNum = olMatch[1];
+          var itemText = olMatch[2];
           if (!inList || listType !== 'ol') {
             flushList();
             html += '<ol>';
             inList = true;
             listType = 'ol';
-            olCounter = 0;
           }
-          olCounter++;
-          html += '<li><span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#0c1546;color:#ffc200;font-family:sans-serif;font-weight:700;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;">' + olCounter + '</span><span>' + formatInline(trimmed.replace(/^\d+[.)]\s/, '')) + '</span></li>';
+          html += '<li><span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#0c1546;color:#ffc200;font-family:sans-serif;font-weight:700;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;">' + itemNum + '</span><span>' + formatInline(itemText) + '</span></li>';
           continue;
         }
 
@@ -826,22 +920,19 @@
     }
 
     function insertLink() {
-      var textInput = document.getElementById('linkText');
-      var urlInput = document.getElementById('linkURL');
+      var linkText = document.getElementById('linkText').value.trim();
+      var linkURL = document.getElementById('linkURL').value.trim();
       var textarea = document.getElementById('rawContent');
-
-      var linkText = textInput.value.trim();
-      var linkURL = urlInput.value.trim();
 
       if (!linkText) {
         alert('Please enter link text.');
-        textInput.focus();
+        document.getElementById('linkText').focus();
         return;
       }
 
       if (!linkURL) {
         alert('Please enter a URL.');
-        urlInput.focus();
+        document.getElementById('linkURL').focus();
         return;
       }
 
@@ -849,310 +940,26 @@
         linkURL = 'https://' + linkURL;
       }
 
-      var safeText = linkText.replace(/\|/g, '');
-      var safeURL = linkURL.replace(/\]/g, '');
-      var token = '[[LINK:' + safeText + '|' + safeURL + ']]';
+      var token = '[[LINK:' + linkText.replace(/\|/g, '') + '|' + linkURL.replace(/\]/g, '') + ']]';
 
-      var start = textarea.selectionStart;
-      var end = textarea.selectionEnd;
-      var value = textarea.value;
-
-      textarea.value = value.substring(0, start) + token + value.substring(end);
       textarea.focus();
+
+      var start = textarea.selectionStart || 0;
+      var end = textarea.selectionEnd || 0;
+      var before = textarea.value.substring(0, start);
+      var after = textarea.value.substring(end);
+
+      textarea.value = before + token + after;
       textarea.selectionStart = textarea.selectionEnd = start + token.length;
 
-      textInput.value = '';
-      urlInput.value = '';
+      document.getElementById('linkText').value = '';
+      document.getElementById('linkURL').value = '';
 
       updatePreview();
     }
 
-    function buildPrintDocument() {
-      var title = document.getElementById('annTitle').value.trim() || 'Your Announcement Title';
-      var docType = document.getElementById('docType').value;
-      var dateText = document.getElementById('pageDocDate').textContent;
-      var contentHTML = document.getElementById('pageContent').innerHTML;
-      var sigName = document.getElementById('sigName').value.trim();
-      var sigTitle = document.getElementById('sigTitle').value.trim();
-
-      var signatureHTML = '';
-      if (sigName) {
-        signatureHTML =
-          '<div class="signature-block">' +
-            '<p class="sincerely">Sincerely,</p>' +
-            '<p class="sig-name">' + escapeHTML(sigName) + '</p>' +
-            (sigTitle ? '<p class="sig-title">' + escapeHTML(sigTitle.toUpperCase()) + '</p>' : '') +
-          '</div>';
-      }
-
-      var printHTML =
-'<!DOCTYPE html>' +
-'<html lang="en">' +
-'<head>' +
-'<meta charset="UTF-8">' +
-'<title>' + escapeHTML(title) + '</title>' +
-'<link href="https://fonts.googleapis.com/css2?family=Baskervville&family=Baskervville+SC&family=Noto+Sans:wght@400;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />' +
-'<style>' +
-'  :root{--gold:#ffc200;--orange:#db6d42;--navy:#0c1546;--border:#dde0ea;}' +
-'  *{box-sizing:border-box;}' +
-'  html,body{margin:0;padding:0;background:#fff;font-family:"Noto Sans",sans-serif;}' +
-'  @page{size:letter portrait;margin:0;}' +
-'  .print-shell{width:8.5in;margin:0 auto;}' +
-'  .page{width:8.5in;height:11in;display:flex;flex-direction:column;overflow:hidden;page-break-after:always;break-after:page;background:#fff;}' +
-'  .page:last-child{page-break-after:auto;break-after:auto;}' +
-'  .page-header{background:var(--navy);padding:22px 32px 18px;display:flex;align-items:center;gap:18px;}' +
-'  .page-header.simple{padding:12px 32px;gap:12px;}' +
-'  .page-header-logo{height:62px;min-width:72px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}' +
-'  .page-header.simple .page-header-logo{height:36px;min-width:46px;}' +
-'  .page-header-logo img{height:62px;max-width:120px;object-fit:contain;display:block;}' +
-'  .page-header.simple .page-header-logo img{height:36px;max-width:72px;}' +
-'  .school-name{font-size:1.45rem;font-weight:700;color:#fff;line-height:1.1;}' +
-'  .page-header.simple .school-name{font-size:1rem;}' +
-'  .school-tagline{font-size:.72rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-top:3px;opacity:.85;}' +
-'  .page-header.simple .school-tagline{font-size:.62rem;}' +
-'  .accent-bar{height:6px;background:linear-gradient(90deg,var(--gold) 0%,var(--orange) 100%);}' +
-'  .doc-type-row{background:var(--gold);padding:5px 32px;display:flex;justify-content:space-between;align-items:center;}' +
-'  .doc-type-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);}' +
-'  .doc-date{font-size:.7rem;color:var(--navy);opacity:.75;}' +
-'  .page-body{padding:30px 56px 36px;flex:1;overflow:hidden;}' +
-'  .announcement-title{font-family:"Noto Serif",serif;font-size:1.6rem;color:var(--navy);margin-bottom:6px;line-height:1.2;}' +
-'  .title-rule{width:54px;height:4px;background:var(--orange);border-radius:2px;margin-bottom:22px;}' +
-'  .content{font-size:.875rem;color:#000;line-height:1.75;}' +
-'  .content p{margin:0 0 14px;}' +
-'  .content h2{font-size:1rem;font-weight:700;color:var(--navy);margin:22px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--gold);}' +
-'  .content h3{font-size:.9rem;font-weight:600;color:var(--orange);margin:16px 0 4px;}' +
-'  .content ul{padding-left:20px;margin:0 0 14px;}' +
-'  .content ul li{margin-bottom:4px;}' +
-'  .content ol{list-style:none;padding-left:0;margin:0 0 14px;}' +
-'  .content ol li{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;line-height:1.5;}' +
-'  .content a{color:var(--navy);font-weight:700;text-decoration:underline;word-break:break-word;}' +
-'  .content strong{font-weight:700;color:var(--navy);}' +
-'  .content .callout{background:#fffbeb;border-left:4px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:.84rem;}' +
-'  .content table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.82rem;}' +
-'  .content th{background:var(--navy);color:#fff;text-align:left;padding:7px 10px;font-size:.78rem;}' +
-'  .content td{padding:6px 10px;border-bottom:1px solid #dde0ea;}' +
-'  .signature-block{margin-top:48px;}' +
-'  .sincerely{font-family:"Baskervville",serif;font-size:1rem;color:#000;border-top:1.5px solid #dde0ea;padding-top:10px;display:inline-block;min-width:200px;margin-bottom:6px;}' +
-'  .sig-name{font-family:"Baskervville",serif;font-style:italic;font-size:1.1rem;color:var(--navy);display:block;padding-left:2px;}' +
-'  .sig-title{font-size:.82rem;color:#666;margin-top:2px;padding-left:2px;text-transform:uppercase;letter-spacing:0;}' +
-'  .page-footer{background:var(--navy);padding:10px 32px;display:flex;justify-content:space-between;align-items:center;margin-top:auto;}' +
-'  .footer-text{font-size:.65rem;color:rgba(255,255,255,.45);}' +
-'  .footer-accent{width:28px;height:3px;background:var(--gold);border-radius:2px;}' +
-'  .measure{position:absolute;left:-99999px;top:0;width:8.5in;height:11in;overflow:hidden;visibility:hidden;}' +
-'</style>' +
-'</head>' +
-'<body>' +
-'<div class="print-shell" id="printShell"></div>' +
-'<div class="measure" id="measure"></div>' +
-'<script>' +
-'(function(){' +
-'var title=' + JSON.stringify(title) + ';' +
-'var docType=' + JSON.stringify(docType) + ';' +
-'var dateText=' + JSON.stringify(dateText) + ';' +
-'var contentHTML=' + JSON.stringify(contentHTML) + ';' +
-'var signatureHTML=' + JSON.stringify(signatureHTML) + ';' +
-
-'function header(simple){return ' + JSON.stringify(
-  '<div class="page-header${SIMPLE}">' +
-    '<div class="page-header-logo"><img src="moore-tool.png" alt="Moore Elementary Logo"></div>' +
-    '<div><div class="school-name">Moore Elementary School</div><div class="school-tagline">${TAG}</div></div>' +
-  '</div>' +
-  '<div class="accent-bar"></div>' +
-  '<div class="doc-type-row"><span class="doc-type-label">${DOCTYPE}</span><span class="doc-date">${DATE}</span></div>'
-) + '.replace("${SIMPLE}", simple ? " simple" : "").replace("${TAG}", simple ? title : docType).replace("${DOCTYPE}", docType).replace("${DATE}", dateText);}' +
-
-'function footer(){return ' + JSON.stringify(
-  '<div class="page-footer"><span class="footer-text">Moore Elementary School &nbsp;&bull;&nbsp; Official Communication</span><div class="footer-accent"></div></div>'
-) + ';}' +
-
-'function skeleton(firstPage, includeSignature){' +
-'return \'<div class="page">\'+header(!firstPage)+\'<div class="page-body">\'+(firstPage ? \'<div class="announcement-title>\' : \'\');' +
-'}' +
-'})();' +
-'</script>' +
-'</body>' +
-'</html>';
-
-      return buildPrintHTML(title, docType, dateText, contentHTML, signatureHTML);
-    }
-
-    function buildPrintHTML(title, docType, dateText, contentHTML, signatureHTML) {
-      return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>${escapeHTML(title)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Baskervville&family=Baskervville+SC&family=Noto+Sans:wght@400;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
-<style>
-  :root{--gold:#ffc200;--orange:#db6d42;--navy:#0c1546;--border:#dde0ea;}
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:#fff;font-family:"Noto Sans",sans-serif;}
-  @page{size:letter portrait;margin:0;}
-  .print-shell{width:8.5in;margin:0 auto;}
-  .page{width:8.5in;height:11in;display:flex;flex-direction:column;overflow:hidden;page-break-after:always;break-after:page;background:#fff;}
-  .page:last-child{page-break-after:auto;break-after:auto;}
-  .page-header{background:var(--navy);padding:22px 32px 18px;display:flex;align-items:center;gap:18px;}
-  .page-header.simple{padding:12px 32px;gap:12px;}
-  .page-header-logo{height:62px;min-width:72px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .page-header.simple .page-header-logo{height:36px;min-width:46px;}
-  .page-header-logo img{height:62px;max-width:120px;object-fit:contain;display:block;}
-  .page-header.simple .page-header-logo img{height:36px;max-width:72px;}
-  .school-name{font-size:1.45rem;font-weight:700;color:#fff;line-height:1.1;}
-  .page-header.simple .school-name{font-size:1rem;}
-  .school-tagline{font-size:.72rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-top:3px;opacity:.85;}
-  .page-header.simple .school-tagline{font-size:.62rem;}
-  .accent-bar{height:6px;background:linear-gradient(90deg,var(--gold) 0%,var(--orange) 100%);}
-  .doc-type-row{background:var(--gold);padding:5px 32px;display:flex;justify-content:space-between;align-items:center;}
-  .doc-type-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);}
-  .doc-date{font-size:.7rem;color:var(--navy);opacity:.75;}
-  .page-body{padding:30px 56px 36px;flex:1;overflow:hidden;}
-  .announcement-title{font-family:"Noto Serif",serif;font-size:1.6rem;color:var(--navy);margin-bottom:6px;line-height:1.2;}
-  .title-rule{width:54px;height:4px;background:var(--orange);border-radius:2px;margin-bottom:22px;}
-  .content{font-size:.875rem;color:#000;line-height:1.75;}
-  .content p{margin:0 0 14px;}
-  .content h2{font-size:1rem;font-weight:700;color:var(--navy);margin:22px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--gold);}
-  .content h3{font-size:.9rem;font-weight:600;color:var(--orange);margin:16px 0 4px;}
-  .content ul{padding-left:20px;margin:0 0 14px;}
-  .content ul li{margin-bottom:4px;}
-  .content ol{list-style:none;padding-left:0;margin:0 0 14px;}
-  .content ol li{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;line-height:1.5;}
-  .content a{color:var(--navy);font-weight:700;text-decoration:underline;word-break:break-word;}
-  .content strong{font-weight:700;color:var(--navy);}
-  .content .callout{background:#fffbeb;border-left:4px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:.84rem;}
-  .content table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.82rem;}
-  .content th{background:var(--navy);color:#fff;text-align:left;padding:7px 10px;font-size:.78rem;}
-  .content td{padding:6px 10px;border-bottom:1px solid #dde0ea;}
-  .signature-block{margin-top:48px;}
-  .sincerely{font-family:"Baskervville",serif;font-size:1rem;color:#000;border-top:1.5px solid #dde0ea;padding-top:10px;display:inline-block;min-width:200px;margin-bottom:6px;}
-  .sig-name{font-family:"Baskervville",serif;font-style:italic;font-size:1.1rem;color:var(--navy);display:block;padding-left:2px;}
-  .sig-title{font-size:.82rem;color:#666;margin-top:2px;padding-left:2px;text-transform:uppercase;letter-spacing:0;}
-  .page-footer{background:var(--navy);padding:10px 32px;display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
-  .footer-text{font-size:.65rem;color:rgba(255,255,255,.45);}
-  .footer-accent{width:28px;height:3px;background:var(--gold);border-radius:2px;}
-  .measure{position:absolute;left:-99999px;top:0;width:8.5in;height:11in;overflow:hidden;visibility:hidden;}
-</style>
-</head>
-<body>
-<div class="print-shell" id="printShell"></div>
-<div class="measure" id="measure"></div>
-
-<script>
-(function(){
-  var title = ${JSON.stringify(title)};
-  var docType = ${JSON.stringify(docType)};
-  var dateText = ${JSON.stringify(dateText)};
-  var contentHTML = ${JSON.stringify(contentHTML)};
-  var signatureHTML = ${JSON.stringify(signatureHTML)};
-
-  function header(simple){
-    return ''
-      + '<div class="page-header' + (simple ? ' simple' : '') + '">'
-      +   '<div class="page-header-logo"><img src="moore-tool.png" alt="Moore Elementary Logo"></div>'
-      +   '<div><div class="school-name">Moore Elementary School</div><div class="school-tagline">' + (simple ? title : docType) + '</div></div>'
-      + '</div>'
-      + '<div class="accent-bar"></div>'
-      + '<div class="doc-type-row"><span class="doc-type-label">' + docType + '</span><span class="doc-date">' + dateText + '</span></div>';
-  }
-
-  function footer(){
-    return '<div class="page-footer"><span class="footer-text">Moore Elementary School &nbsp;&bull;&nbsp; Official Communication</span><div class="footer-accent"></div></div>';
-  }
-
-  function skeleton(firstPage, includeSignature){
-    return ''
-      + '<div class="page">'
-      + header(!firstPage)
-      + '<div class="page-body">'
-      + (firstPage ? '<div class="announcement-title">' + title + '</div><div class="title-rule"></div>' : '')
-      + '<div class="content" id="flow"></div>'
-      + (includeSignature ? signatureHTML : '')
-      + '</div>'
-      + footer()
-      + '</div>';
-  }
-
-  var source = document.createElement('div');
-  source.innerHTML = contentHTML;
-
-  var nodes = Array.from(source.childNodes).filter(function(n){
-    return !(n.nodeType === 3 && !n.textContent.trim());
-  });
-
-  var shell = document.getElementById('printShell');
-  var measure = document.getElementById('measure');
-  var pageNum = 1;
-
-  while(nodes.length){
-    measure.innerHTML = skeleton(pageNum === 1, false);
-    var flow = measure.querySelector('#flow');
-    var body = measure.querySelector('.page-body');
-    var pageNodes = [];
-
-    while(nodes.length){
-      var testNode = nodes[0].cloneNode(true);
-      flow.appendChild(testNode);
-
-      if(body.scrollHeight > body.clientHeight){
-        flow.removeChild(testNode);
-        break;
-      } else {
-        pageNodes.push(nodes.shift());
-      }
-    }
-
-    if(!pageNodes.length && nodes.length){
-      pageNodes.push(nodes.shift());
-    }
-
-    var isLast = nodes.length === 0;
-
-    measure.innerHTML = skeleton(pageNum === 1, isLast && !!signatureHTML);
-    flow = measure.querySelector('#flow');
-    body = measure.querySelector('.page-body');
-
-    pageNodes.forEach(function(n){
-      flow.appendChild(n.cloneNode(true));
-    });
-
-    if(isLast && signatureHTML && body.scrollHeight > body.clientHeight){
-      measure.innerHTML = skeleton(pageNum === 1, false);
-      flow = measure.querySelector('#flow');
-      pageNodes.forEach(function(n){
-        flow.appendChild(n.cloneNode(true));
-      });
-      shell.insertAdjacentHTML('beforeend', measure.innerHTML);
-
-      pageNum++;
-      measure.innerHTML = skeleton(false, true);
-      shell.insertAdjacentHTML('beforeend', measure.innerHTML);
-    } else {
-      shell.insertAdjacentHTML('beforeend', measure.innerHTML);
-    }
-
-    pageNum++;
-  }
-
-  if(!shell.innerHTML.trim()){
-    shell.innerHTML = skeleton(true, !!signatureHTML);
-    shell.querySelector('#flow').innerHTML = contentHTML;
-  }
-
-  setTimeout(function(){
-    window.print();
-  }, 300);
-})();
-</script>
-</body>
-</html>
-      `;
-    }
-
     function downloadPDF() {
-      var printWin = window.open('', '_blank', 'width=900,height=1200');
-      printWin.document.open();
-      printWin.document.write(buildPrintDocument());
-      printWin.document.close();
+      window.print();
     }
 
     function clearAll() {
