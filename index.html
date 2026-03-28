@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -18,354 +19,386 @@
     --page-w: 680px;
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Noto Sans', sans-serif;
-    background: var(--bg);
-    color: var(--black);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+body {
+font-family: ‘Noto Sans’, sans-serif;
+background: var(–bg);
+color: var(–black);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+}
 
-  /* ── App Header ── */
-  .app-bar {
-    background: var(--navy);
-    color: var(--white);
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    border-bottom: 4px solid var(--gold);
-  }
-  .app-bar h1 {
-    font-family: 'Baskervville SC', serif;
-    font-size: 1.25rem;
-    letter-spacing: .04em;
-    color: var(--gold);
-  }
-  .app-bar span {
-    font-size: .8rem;
-    color: rgba(255,255,255,.55);
-    margin-left: auto;
-  }
+/* ── App Header ── */
+.app-bar {
+background: var(–navy);
+color: var(–white);
+padding: 14px 28px;
+display: flex;
+align-items: center;
+gap: 14px;
+border-bottom: 4px solid var(–gold);
+}
+.app-bar h1 {
+font-family: ‘Baskervville SC’, serif;
+font-size: 1.25rem;
+letter-spacing: .04em;
+color: var(–gold);
+}
+.app-bar span {
+font-size: .8rem;
+color: rgba(255,255,255,.55);
+margin-left: auto;
+}
 
-  /* ── Layout ── */
-  .workspace {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    flex: 1;
-    height: calc(100vh - 57px);
-  }
+/* ── Layout ── */
+.workspace {
+display: grid;
+grid-template-columns: 340px 1fr;
+flex: 1;
+height: calc(100vh - 57px);
+}
 
-  /* ── Left Panel ── */
-  .panel {
-    background: var(--white);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  .panel-section {
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .panel-section label {
-    display: block;
-    font-size: .72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--navy);
-    margin-bottom: 6px;
-  }
-  .panel-section input[type="text"],
-  .panel-section input[type="date"],
-  .panel-section textarea,
-  .panel-section select {
-    width: 100%;
-    font-family: 'Noto Sans', sans-serif;
-    font-size: .875rem;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--black);
-    outline: none;
-    transition: border-color .15s;
-  }
-  .panel-section input:focus,
-  .panel-section textarea:focus,
-  .panel-section select:focus { border-color: var(--navy); }
-  .panel-section textarea {
-    resize: vertical;
-    min-height: 240px;
-    line-height: 1.6;
-  }
+/* ── Left Panel ── */
+.panel {
+background: var(–white);
+border-right: 1px solid var(–border);
+display: flex;
+flex-direction: column;
+overflow-y: auto;
+}
+.panel-section {
+padding: 18px 20px;
+border-bottom: 1px solid var(–border);
+}
+.panel-section label {
+display: block;
+font-size: .72rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: .08em;
+color: var(–navy);
+margin-bottom: 6px;
+}
+.panel-section input[type=“text”],
+.panel-section input[type=“date”],
+.panel-section textarea,
+.panel-section select {
+width: 100%;
+font-family: ‘Noto Sans’, sans-serif;
+font-size: .875rem;
+padding: 8px 10px;
+border: 1px solid var(–border);
+border-radius: 6px;
+background: var(–bg);
+color: var(–black);
+outline: none;
+transition: border-color .15s;
+}
+.panel-section input:focus,
+.panel-section textarea:focus,
+.panel-section select:focus { border-color: var(–navy); }
+.panel-section textarea {
+resize: vertical;
+min-height: 240px;
+line-height: 1.6;
+}
 
-  /* Logo upload */
-  .logo-upload-area {
-    border: 2px dashed var(--border);
-    border-radius: 8px;
-    padding: 18px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    background: var(--bg);
-  }
-  .logo-upload-area:hover { border-color: var(--gold); background: #fffdf0; }
-  .logo-upload-area input { display: none; }
-  .logo-upload-area img { max-height: 64px; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 8px; }
-  .logo-upload-area p { font-size: .78rem; color: #888; }
-  .logo-upload-area .upload-icon { font-size: 1.8rem; line-height: 1; margin-bottom: 4px; }
+/* Logo upload */
+.logo-upload-area {
+border: 2px dashed var(–border);
+border-radius: 8px;
+padding: 18px;
+text-align: center;
+cursor: pointer;
+transition: border-color .2s, background .2s;
+background: var(–bg);
+}
+.logo-upload-area:hover { border-color: var(–gold); background: #fffdf0; }
+.logo-upload-area input { display: none; }
+.logo-upload-area img { max-height: 64px; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 8px; }
+.logo-upload-area p { font-size: .78rem; color: #888; }
+.logo-upload-area .upload-icon { font-size: 1.8rem; line-height: 1; margin-bottom: 4px; }
 
-  /* Action buttons */
-  .actions { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
-  .btn {
-    padding: 11px 18px;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Noto Sans', sans-serif;
-    font-weight: 700;
-    font-size: .875rem;
-    cursor: pointer;
-    transition: opacity .15s, transform .1s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .btn:hover { opacity: .88; transform: translateY(-1px); }
-  .btn:active { transform: translateY(0); }
-  .btn-primary { background: var(--navy); color: var(--white); }
-  .btn-secondary { background: var(--gold); color: var(--navy); }
-  .btn-outline { background: transparent; border: 2px solid var(--orange); color: var(--orange); }
+/* Action buttons */
+.actions { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.btn {
+padding: 11px 18px;
+border: none;
+border-radius: 8px;
+font-family: ‘Noto Sans’, sans-serif;
+font-weight: 700;
+font-size: .875rem;
+cursor: pointer;
+transition: opacity .15s, transform .1s;
+display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:hover { opacity: .88; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(–navy); color: var(–white); }
+.btn-secondary { background: var(–gold); color: var(–navy); }
+.btn-outline { background: transparent; border: 2px solid var(–orange); color: var(–orange); }
 
-  /* Hint */
-  .hint { font-size: .73rem; color: #888; margin-top: 6px; line-height: 1.5; }
+/* Hint */
+.hint { font-size: .73rem; color: #888; margin-top: 6px; line-height: 1.5; }
 
-  /* ── Preview Panel ── */
-  .preview-wrap {
-    background: #e8e9ed;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 24px 48px;
-  }
-  .preview-label {
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: #888;
-    margin-bottom: 14px;
-    align-self: flex-start;
-    margin-left: calc(50% - var(--page-w)/2);
-  }
+/* ── Preview Panel ── */
+.preview-wrap {
+background: #e8e9ed;
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 32px 24px 48px;
+}
+.preview-label {
+font-size: .7rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: .1em;
+color: #888;
+margin-bottom: 14px;
+align-self: flex-start;
+margin-left: calc(50% - var(–page-w)/2);
+}
 
-  /* ══ THE PAGE ══ */
-  #page {
-    width: var(--page-w);
-    min-height: 880px;
-    background: var(--white);
-    box-shadow: 0 4px 32px rgba(0,0,0,.18);
-    border-radius: 4px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-  }
+/* ══ THE PAGE ══ */
+#page {
+width: var(–page-w);
+min-height: 880px;
+background: var(–white);
+box-shadow: 0 4px 32px rgba(0,0,0,.18);
+border-radius: 4px;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+margin: 0 auto;
+}
 
-  /* Page Header */
-  .page-header {
-    background: var(--navy);
-    padding: 22px 32px 18px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  .page-header-logo {
-    height: 62px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .page-header-logo img { height: 62px; max-width: 120px; object-fit: contain; }
-  .page-header-logo .initials {
-    font-family: 'Baskervville SC', serif;
-    font-size: 1.5rem;
-    color: var(--gold);
-    font-weight: bold;
-  }
-  .page-header-text { flex: 1; }
-  .school-name {
-    font-family: 'Noto Sans', sans-serif;
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: var(--white);
-    letter-spacing: .02em;
-    line-height: 1.1;
-  }
-  .school-tagline {
-    font-family: 'Noto Sans', sans-serif;
-    font-size: .72rem;
-    color: var(--gold);
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-top: 3px;
-    opacity: .85;
-  }
+/* Page Header */
+.page-header {
+background: var(–navy);
+padding: 22px 32px 18px;
+display: flex;
+align-items: center;
+gap: 18px;
+}
+.page-header-logo {
+height: 62px;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+}
+.page-header-logo img { height: 62px; max-width: 120px; object-fit: contain; }
+.page-header-logo .initials {
+font-family: ‘Baskervville SC’, serif;
+font-size: 1.5rem;
+color: var(–gold);
+font-weight: bold;
+}
+.page-header-text { flex: 1; }
+.school-name {
+font-family: ‘Noto Sans’, sans-serif;
+font-size: 1.45rem;
+font-weight: 700;
+color: var(–white);
+letter-spacing: .02em;
+line-height: 1.1;
+}
+.school-tagline {
+font-family: ‘Noto Sans’, sans-serif;
+font-size: .72rem;
+color: var(–gold);
+letter-spacing: .12em;
+text-transform: uppercase;
+margin-top: 3px;
+opacity: .85;
+}
 
-  /* Gold accent bar */
-  .accent-bar {
-    height: 6px;
-    background: linear-gradient(90deg, var(--gold) 0%, var(--orange) 100%);
-  }
+/* Gold accent bar */
+.accent-bar {
+height: 6px;
+background: linear-gradient(90deg, var(–gold) 0%, var(–orange) 100%);
+}
 
-  /* Doc type badge */
-  .doc-type-row {
-    background: var(--gold);
-    padding: 5px 32px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .doc-type-label {
-    font-family: 'Noto Sans', sans-serif;
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    color: var(--navy);
-  }
-  .doc-date {
-    font-family: 'Noto Sans', sans-serif;
-    font-size: .7rem;
-    color: var(--navy);
-    opacity: .75;
-  }
+/* Doc type badge */
+.doc-type-row {
+background: var(–gold);
+padding: 5px 32px;
+display: flex; justify-content: space-between; align-items: center;
+}
+.doc-type-label {
+font-family: ‘Noto Sans’, sans-serif;
+font-size: .7rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: .12em;
+color: var(–navy);
+}
+.doc-date {
+font-family: ‘Noto Sans’, sans-serif;
+font-size: .7rem;
+color: var(–navy);
+opacity: .75;
+}
 
-  /* Page Body */
-  .page-body {
-    padding: 30px 36px 36px;
-    flex: 1;
-  }
-  .announcement-title {
-    font-family: 'Noto Serif', serif;
-    font-size: 1.6rem;
-    color: var(--navy);
-    margin-bottom: 6px;
-    line-height: 1.2;
-  }
-  .title-rule {
-    width: 54px; height: 4px;
-    background: var(--orange);
-    border-radius: 2px;
-    margin-bottom: 22px;
-  }
+/* Page Body */
+.page-body {
+padding: 30px 36px 36px;
+flex: 1;
+}
+.announcement-title {
+font-family: ‘Noto Serif’, serif;
+font-size: 1.6rem;
+color: var(–navy);
+margin-bottom: 6px;
+line-height: 1.2;
+}
+.title-rule {
+width: 54px; height: 4px;
+background: var(–orange);
+border-radius: 2px;
+margin-bottom: 22px;
+}
 
-  /* Formatted content */
-  .doc-content { font-family: 'Noto Sans', sans-serif; font-size: .875rem; color: var(--black); line-height: 1.75; }
-  .doc-content p { margin-bottom: 14px; }
-  .doc-content h2 {
-    font-family: 'Noto Sans', sans-serif;
-    font-size: 1rem; font-weight: 700;
-    color: var(--navy);
-    margin: 22px 0 6px;
-    padding-bottom: 4px;
-    border-bottom: 2px solid var(--gold);
-  }
-  .doc-content h3 {
-    font-family: 'Noto Sans', sans-serif;
-    font-size: .9rem; font-weight: 600;
-    color: var(--orange);
-    margin: 16px 0 4px;
-  }
-  .doc-content ul, .doc-content ol { padding-left: 20px; margin-bottom: 14px; }
-  .doc-content li { margin-bottom: 4px; }
-  .doc-content strong { font-weight: 700; color: var(--navy); }
-  .doc-content .callout {
-    background: #fffbeb;
-    border-left: 4px solid var(--gold);
-    padding: 10px 14px;
-    border-radius: 0 6px 6px 0;
-    margin: 14px 0;
-    font-size: .84rem;
-  }
-  .doc-content table {
-    width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .82rem;
-  }
-  .doc-content th {
-    background: var(--navy); color: var(--white);
-    font-weight: 600; text-align: left;
-    padding: 7px 10px; font-size: .78rem; letter-spacing: .04em;
-  }
-  .doc-content td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
-  .doc-content tr:nth-child(even) td { background: #f9f9fb; }
+/* Formatted content */
+.doc-content { font-family: ‘Noto Sans’, sans-serif; font-size: .875rem; color: var(–black); line-height: 1.75; }
+.doc-content p { margin-bottom: 14px; }
+.doc-content h2 {
+font-family: ‘Noto Sans’, sans-serif;
+font-size: 1rem; font-weight: 700;
+color: var(–navy);
+margin: 22px 0 6px;
+padding-bottom: 4px;
+border-bottom: 2px solid var(–gold);
+}
+.doc-content h3 {
+font-family: ‘Noto Sans’, sans-serif;
+font-size: .9rem; font-weight: 600;
+color: var(–orange);
+margin: 16px 0 4px;
+}
+.doc-content ul { padding-left: 20px; margin-bottom: 14px; }
+.doc-content ul li { margin-bottom: 4px; }
 
-  /* Page Footer */
-  .page-footer {
-    background: var(--navy);
-    padding: 10px 32px;
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: auto;
-  }
-  .footer-text { font-size: .65rem; color: rgba(255,255,255,.45); font-family: 'Noto Sans', sans-serif; }
-  .footer-accent { width: 28px; height: 3px; background: var(--gold); border-radius: 2px; }
+/* ── Numbered list: navy circle with gold number ── */
+.doc-content ol {
+list-style: none;
+padding-left: 0;
+margin-bottom: 14px;
+}
+.doc-content ol li {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+margin-bottom: 10px;
+line-height: 1.5;
+}
+.doc-content .num-circle {
+flex-shrink: 0;
+width: 26px;
+height: 26px;
+border-radius: 50%;
+background: #0c1546;
+color: #ffc200;
+font-family: ‘Noto Sans’, sans-serif;
+font-weight: 700;
+font-size: .75rem;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+margin-top: 1px;
+}
 
-  /* Empty state */
-  .empty-state {
-    padding: 48px 32px;
-    text-align: center;
-    color: #bbb;
-    font-size: .875rem;
-    line-height: 1.8;
-  }
-  .empty-state .big { font-size: 2.5rem; margin-bottom: 8px; }
+.doc-content strong { font-weight: 700; color: var(–navy); }
+.doc-content .callout {
+background: #fffbeb;
+border-left: 4px solid var(–gold);
+padding: 10px 14px;
+border-radius: 0 6px 6px 0;
+margin: 14px 0;
+font-size: .84rem;
+}
+.doc-content table {
+width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .82rem;
+}
+.doc-content th {
+background: var(–navy); color: var(–white);
+font-weight: 600; text-align: left;
+padding: 7px 10px; font-size: .78rem; letter-spacing: .04em;
+}
+.doc-content td { padding: 6px 10px; border-bottom: 1px solid var(–border); }
+.doc-content tr:nth-child(even) td { background: #f9f9fb; }
 
-  /* Signature block */
-  .signature-block {
-    margin-top: 48px;
-    padding-top: 0;
-  }
-  .sincerely {
-    font-family: 'Baskervville', serif;
-    font-style: normal;
-    font-size: 1rem;
-    color: var(--black);
-    border-top: 1.5px solid var(--border);
-    padding-top: 10px;
-    display: inline-block;
-    min-width: 200px;
-    margin-bottom: 6px;
-  }
-  .sig-name {
-    font-family: 'Baskervville', serif;
-    font-style: italic;
-    font-size: 1.1rem;
-    color: var(--navy);
-    display: block;
-    padding-left: 2px;
-  }
+/* Page Footer */
+.page-footer {
+background: var(–navy);
+padding: 10px 32px;
+display: flex; justify-content: space-between; align-items: center;
+margin-top: auto;
+}
+.footer-text { font-size: .65rem; color: rgba(255,255,255,.45); font-family: ‘Noto Sans’, sans-serif; }
+.footer-accent { width: 28px; height: 3px; background: var(–gold); border-radius: 2px; }
 
-  /* ── Print Styles ── */
-  @media print {
-    @page { margin: 0; size: letter portrait; }
-    body * { visibility: hidden; }
-    #page, #page * { visibility: visible; }
-    #page {
-      position: fixed; left: 0; top: 0;
-      width: 100vw; height: 100vh;
-      min-height: unset;
-      box-shadow: none; border-radius: 0;
-      margin: 0;
-    }
-    .page-footer {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-    }
-  }
+/* Empty state */
+.empty-state {
+padding: 48px 32px;
+text-align: center;
+color: #bbb;
+font-size: .875rem;
+line-height: 1.8;
+}
+.empty-state .big { font-size: 2.5rem; margin-bottom: 8px; }
+
+/* Signature block */
+.signature-block {
+margin-top: 48px;
+padding-top: 0;
+}
+.sincerely {
+font-family: ‘Baskervville’, serif;
+font-style: normal;
+font-size: 1rem;
+color: var(–black);
+border-top: 1.5px solid var(–border);
+padding-top: 10px;
+display: inline-block;
+min-width: 200px;
+margin-bottom: 6px;
+}
+.sig-name {
+font-family: ‘Baskervville’, serif;
+font-style: italic;
+font-size: 1.1rem;
+color: var(–navy);
+display: block;
+padding-left: 2px;
+}
+
+/* ── Print Styles ── */
+@media print {
+@page { margin: 0; size: letter portrait; }
+body * { visibility: hidden; }
+#page, #page * { visibility: visible; }
+#page {
+position: fixed; left: 0; top: 0;
+width: 100vw; height: 100vh;
+min-height: unset;
+box-shadow: none; border-radius: 0;
+margin: 0;
+}
+.page-footer {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+}
+}
 </style>
+
 </head>
 <body>
 
 <!-- App Bar -->
+
 <div class="app-bar">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
   <h1>Moore Elementary — Announcement Builder</h1>
@@ -375,120 +408,130 @@
 <div class="workspace">
 
   <!-- ── Left Panel ── -->
+
   <div class="panel">
 
-    <div class="panel-section">
-      <label>School Logo</label>
-      <div class="logo-upload-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
-        <input type="file" id="logoInput" accept="image/*" onchange="handleLogoUpload(event)" />
-        <div id="logoPreviewContainer">
-          <div class="upload-icon">🏫</div>
-          <p>Click to upload your logo<br/><em>PNG, JPG, SVG supported</em></p>
-        </div>
-      </div>
+```
+<div class="panel-section">
+  <label>School Logo</label>
+  <div class="logo-upload-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
+    <input type="file" id="logoInput" accept="image/*" onchange="handleLogoUpload(event)" />
+    <div id="logoPreviewContainer">
+      <div class="upload-icon">🏫</div>
+      <p>Click to upload your logo<br/><em>PNG, JPG, SVG supported</em></p>
     </div>
+  </div>
+</div>
 
-    <div class="panel-section">
-      <label>Announcement Title</label>
-      <input type="text" id="annTitle" placeholder="e.g. Spring Field Day 2025" oninput="updatePreview()" />
-    </div>
+<div class="panel-section">
+  <label>Announcement Title</label>
+  <input type="text" id="annTitle" placeholder="e.g. Spring Field Day 2025" oninput="updatePreview()" />
+</div>
 
-    <div class="panel-section">
-      <label>Document Type</label>
-      <select id="docType" onchange="updatePreview()">
-        <option value="School Announcement">School Announcement</option>
-        <option value="Parent Newsletter">Parent Newsletter</option>
-        <option value="Event Notice">Event Notice</option>
-        <option value="Important Update">Important Update</option>
-        <option value="Classroom News">Classroom News</option>
-        <option value="Parent Teacher Organization Communication">Parent Teacher Organization Communication</option>
-        <option value="Parent Teacher Organization Announcement">Parent Teacher Organization Announcement</option>
-      </select>
-    </div>
+<div class="panel-section">
+  <label>Document Type</label>
+  <select id="docType" onchange="updatePreview()">
+    <option value="School Announcement">School Announcement</option>
+    <option value="Parent Newsletter">Parent Newsletter</option>
+    <option value="Event Notice">Event Notice</option>
+    <option value="Important Update">Important Update</option>
+    <option value="Classroom News">Classroom News</option>
+    <option value="Parent Teacher Organization Communication">Parent Teacher Organization Communication</option>
+    <option value="Parent Teacher Organization Announcement">Parent Teacher Organization Announcement</option>
+  </select>
+</div>
 
-    <div class="panel-section">
-      <label>Date</label>
-      <input type="date" id="docDate" oninput="updatePreview()" />
-    </div>
+<div class="panel-section">
+  <label>Date</label>
+  <input type="date" id="docDate" oninput="updatePreview()" />
+</div>
 
-    <div class="panel-section">
-      <label>Paste Your Content</label>
-      <textarea id="rawContent" placeholder="Paste your text here…
+<div class="panel-section">
+  <label>Paste Your Content</label>
+  <textarea id="rawContent" placeholder="Paste your text here…
+```
 
 Tips for formatting:
 • Lines ending with : become section headers
 • Lines starting with - or * become bullet points
 • Wrap text in **bold** for bold
 • Use | col | col | rows for tables
-• Prefix a line with ! for a callout box"
-        oninput="updatePreview()"></textarea>
-      <p class="hint">Supports plain text, basic Markdown-style shortcuts, and pipe-separated tables.</p>
-    </div>
+• Prefix a line with ! for a callout box
+• Lines starting with 1. 2. 3. become navy circle numbers”
+oninput=“updatePreview()”></textarea>
+<p class="hint">Supports plain text, basic Markdown-style shortcuts, and pipe-separated tables.</p>
+</div>
 
-    <div class="panel-section">
-      <label>Signature Name</label>
-      <input type="text" id="sigName" placeholder="e.g. Mrs. Johnson" oninput="updatePreview()" />
-      <p class="hint">Appears at the bottom as "Sincerely, [Name]"</p>
-    </div>
+```
+<div class="panel-section">
+  <label>Signature Name</label>
+  <input type="text" id="sigName" placeholder="e.g. Mrs. Johnson" oninput="updatePreview()" />
+  <p class="hint">Appears at the bottom as "Sincerely, [Name]"</p>
+</div>
 
-    <div class="actions">
-      <button class="btn btn-primary" id="downloadBtn" onclick="downloadPDF()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Download PDF
-      </button>
-      <button class="btn btn-secondary" onclick="clearAll()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-        Clear & Start Over
-      </button>
-    </div>
+<div class="actions">
+  <button class="btn btn-primary" id="downloadBtn" onclick="downloadPDF()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Download PDF
+  </button>
+  <button class="btn btn-secondary" onclick="clearAll()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+    Clear & Start Over
+  </button>
+</div>
+```
 
   </div>
 
   <!-- ── Preview Panel ── -->
+
   <div class="preview-wrap">
     <div class="preview-label">Live Preview</div>
 
-    <div id="page">
-      <!-- Header -->
-      <div class="page-header">
-        <div class="page-header-logo" id="pageLogoWrap">
-          <span class="initials" id="pageLogoInitials">ME</span>
-        </div>
-        <div class="page-header-text">
-          <div class="school-name">Moore Elementary School</div>
-          <div class="school-tagline" id="pageDocTypeTag">School Announcement</div>
-        </div>
-      </div>
+```
+<div id="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-logo" id="pageLogoWrap">
+      <span class="initials" id="pageLogoInitials">ME</span>
+    </div>
+    <div class="page-header-text">
+      <div class="school-name">Moore Elementary School</div>
+      <div class="school-tagline" id="pageDocTypeTag">School Announcement</div>
+    </div>
+  </div>
 
-      <div class="accent-bar"></div>
+  <div class="accent-bar"></div>
 
-      <div class="doc-type-row">
-        <span class="doc-type-label" id="pageDocTypeBadge">School Announcement</span>
-        <span class="doc-date" id="pageDocDate"></span>
-      </div>
+  <div class="doc-type-row">
+    <span class="doc-type-label" id="pageDocTypeBadge">School Announcement</span>
+    <span class="doc-date" id="pageDocDate"></span>
+  </div>
 
-      <!-- Body -->
-      <div class="page-body">
-        <div class="announcement-title" id="pageTitle">Your Announcement Title</div>
-        <div class="title-rule"></div>
-        <div class="doc-content" id="pageContent">
-          <div class="empty-state">
-            <div class="big">📄</div>
-            Paste your content in the left panel<br/>and it will appear here, formatted.
-          </div>
-        </div>
-        <div class="signature-block" id="pageSignature" style="display:none">
-          <p class="sincerely">Sincerely,</p>
-          <p class="sig-name" id="sigDisplay"></p>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="page-footer">
-        <span class="footer-text">Moore Elementary School &nbsp;•&nbsp; Official Communication</span>
-        <div class="footer-accent"></div>
+  <!-- Body -->
+  <div class="page-body">
+    <div class="announcement-title" id="pageTitle">Your Announcement Title</div>
+    <div class="title-rule"></div>
+    <div class="doc-content" id="pageContent">
+      <div class="empty-state">
+        <div class="big">📄</div>
+        Paste your content in the left panel<br/>and it will appear here, formatted.
       </div>
     </div>
+    <div class="signature-block" id="pageSignature" style="display:none">
+      <p class="sincerely">Sincerely,</p>
+      <p class="sig-name" id="sigDisplay"></p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="page-footer">
+    <span class="footer-text">Moore Elementary School &nbsp;•&nbsp; Official Communication</span>
+    <div class="footer-accent"></div>
+  </div>
+</div>
+```
+
   </div>
 </div>
 
@@ -560,6 +603,7 @@ Tips for formatting:
     let inList = false;
     let listType = '';
     let tableBuffer = [];
+    let olCounter = 0;
 
     function flushList() {
       if (!inList) return;
@@ -632,10 +676,11 @@ Tips for formatting:
         return;
       }
 
-      // Numbered list
+      // Numbered list — inject circle span directly for reliable rendering
       if (/^\d+[.)]\s/.test(trimmed)) {
-        if (!inList || listType !== 'ol') { flushList(); html += '<ol>'; inList = true; listType = 'ol'; }
-        html += `<li>${formatInline(trimmed.replace(/^\d+[.)]\s/, ''))}</li>`;
+        if (!inList || listType !== 'ol') { flushList(); html += '<ol>'; inList = true; listType = 'ol'; olCounter = 0; }
+        olCounter++;
+        html += `<li><span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#0c1546;color:#ffc200;font-family:'Noto Sans',sans-serif;font-weight:700;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;margin-top:1px;">${olCounter}</span><span>${formatInline(trimmed.replace(/^\d+[.)]\s/, ''))}</span></li>`;
         return;
       }
 
@@ -684,6 +729,7 @@ ${styles}
     bottom: 0; left: 0; right: 0;
   }
 </style>
+
 </head>
 <body>${pageEl.outerHTML}</body>
 </html>`);
@@ -696,17 +742,18 @@ ${styles}
     };
   }
 
-  function clearAll() {
-    document.getElementById('annTitle').value = '';
-    document.getElementById('rawContent').value = '';
-    document.getElementById('docType').selectedIndex = 0;
-    document.getElementById('docDate').valueAsDate = new Date();
-    logoDataURL = null;
-    document.getElementById('pageLogoWrap').innerHTML = '<span class="initials" id="pageLogoInitials">ME</span>';
-    document.getElementById('logoPreviewContainer').innerHTML = '<div class="upload-icon">🏫</div><p>Click to upload your logo<br/><em>PNG, JPG, SVG supported</em></p>';
-    document.getElementById('sigName').value = '';
-    updatePreview();
-  }
+function clearAll() {
+document.getElementById(‘annTitle’).value = ‘’;
+document.getElementById(‘rawContent’).value = ‘’;
+document.getElementById(‘docType’).selectedIndex = 0;
+document.getElementById(‘docDate’).valueAsDate = new Date();
+logoDataURL = null;
+document.getElementById(‘pageLogoWrap’).innerHTML = ‘<span class="initials" id="pageLogoInitials">ME</span>’;
+document.getElementById(‘logoPreviewContainer’).innerHTML = ‘<div class="upload-icon">🏫</div><p>Click to upload your logo<br/><em>PNG, JPG, SVG supported</em></p>’;
+document.getElementById(‘sigName’).value = ‘’;
+updatePreview();
+}
 </script>
+
 </body>
 </html>
