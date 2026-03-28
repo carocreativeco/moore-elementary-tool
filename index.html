@@ -493,6 +493,10 @@
       display: none;
     }
 
+    .running-footer {
+      display: none;
+    }
+
     @media print {
       @page {
         size: letter portrait;
@@ -526,7 +530,8 @@
         margin: 0;
         border-radius: 0;
         box-shadow: none;
-        padding-top: 36px;
+        padding-top: 66px;
+        padding-bottom: 40px;
       }
 
       .running-header {
@@ -555,10 +560,40 @@
         opacity: .7;
       }
 
+      .running-footer {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 8.5in;
+        height: 40px;
+        background: var(--navy);
+        padding: 0 32px;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 1000;
+      }
+
+      .running-footer .footer-text {
+        font-size: .65rem;
+        color: rgba(255,255,255,.45);
+      }
+
+      .running-footer .footer-accent {
+        width: 28px;
+        height: 3px;
+        background: var(--gold);
+        border-radius: 2px;
+      }
+
       .page-header {
-        margin-top: -36px;
+        margin-top: -66px;
         position: relative;
         z-index: 1001;
+      }
+
+      .page-footer {
+        display: none;
       }
 
       .page-body {
@@ -567,8 +602,7 @@
 
       .page-header,
       .accent-bar,
-      .doc-type-row,
-      .page-footer {
+      .doc-type-row {
         break-inside: avoid;
       }
     }
@@ -652,6 +686,10 @@
           <span class="running-title" id="runningTitle">Your Announcement Title</span>
           <span class="running-date" id="runningDate"></span>
         </div>
+        <div class="running-footer">
+          <span class="footer-text">Moore Elementary School &nbsp;&bull;&nbsp; Official Communication</span>
+          <div class="footer-accent"></div>
+        </div>
         <div class="page-header">
           <div class="page-header-logo">
             <img src="moore-tool.png" alt="Moore Elementary Logo" />
@@ -698,6 +736,8 @@
   <div class="support-footer">
     Having issues with the tool?
     <a href="mailto:chughes.social@gmail.com?subject=Issue%20with%20Moore%20Elementary%20Announcement%20Builder">Click here</a>.
+    &nbsp;&bull;&nbsp;
+    <a href="moore-announcement-builder-guide.pdf" target="_blank">View User Guide</a>
   </div>
 
   <script>
