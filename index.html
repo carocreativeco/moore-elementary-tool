@@ -109,6 +109,30 @@
       line-height: 1.6;
     }
 
+    .link-tools {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--navy);
+      font-family: 'Noto Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    .mini-btn:hover {
+      background: #f8f9fc;
+      border-color: var(--navy);
+    }
+
     .actions {
       padding: 16px 20px;
       display: flex;
@@ -254,7 +278,7 @@
     }
 
     .page-body {
-      padding: 30px 36px 36px;
+      padding: 30px 56px 36px;
       flex: 1;
     }
 
@@ -357,7 +381,7 @@
 
     .doc-content th {
       background: var(--navy);
-      color: var(--white);
+      color: white;
       font-weight: 600;
       text-align: left;
       padding: 7px 10px;
@@ -415,7 +439,7 @@
     .sincerely {
       font-family: 'Baskervville', serif;
       font-size: 1rem;
-      color: var(--black);
+      color: #000;
       border-top: 1.5px solid var(--border);
       padding-top: 10px;
       display: inline-block;
@@ -437,6 +461,8 @@
       color: #666;
       margin-top: 2px;
       padding-left: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0;
     }
 
     .support-footer {
@@ -500,11 +526,11 @@
 
       <div class="panel-section">
         <label>Paste Your Content</label>
+        <div class="link-tools">
+          <button type="button" class="mini-btn" onclick="insertLink()">Insert Link</button>
+        </div>
         <textarea id="rawContent"></textarea>
-        <p class="hint">
-          Use <strong>[linked text](https://example.com)</strong><br>
-          Example: <strong>Click [HERE](https://example.com)</strong>
-        </p>
+        <p class="hint">Use the Insert Link button to add linked text directly into your content.</p>
       </div>
 
       <div class="panel-section">
@@ -518,12 +544,8 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-primary" onclick="downloadPDF()">
-          Download PDF
-        </button>
-        <button class="btn btn-secondary" onclick="clearAll()">
-          Clear and Start Over
-        </button>
+        <button class="btn btn-primary" onclick="downloadPDF()">Download PDF</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear and Start Over</button>
       </div>
     </div>
 
@@ -583,13 +605,11 @@
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('docDate').valueAsDate = new Date();
       document.getElementById('rawContent').placeholder =
-        'Paste your text here...\n\nExample:\nReady to get involved? Click [HERE](https://example.com)';
-
+        'Paste your text here...\n\nExample:\nReady to get involved? Click HERE';
       ['annTitle', 'docType', 'docDate', 'rawContent', 'sigName', 'sigTitle'].forEach(function(id) {
         var el = document.getElementById(id);
         el.addEventListener(id === 'docType' ? 'change' : 'input', updatePreview);
       });
-
       updatePreview();
     });
 
@@ -626,7 +646,7 @@
         sigBlock.style.display = 'block';
 
         if (sigTitle) {
-          sigTitleDisplay.textContent = sigTitle;
+          sigTitleDisplay.textContent = sigTitle.toUpperCase();
           sigTitleDisplay.style.display = 'block';
         } else {
           sigTitleDisplay.style.display = 'none';
@@ -656,7 +676,7 @@
       var placeholders = [];
       var escaped = escapeHTML(text);
 
-      escaped = escaped.replace(/$$([^$$]+)\]\((https?:\/\/[^\s)]+)\)/g, function(match, label, url) {
+      escaped = escaped.replace(/$$\[LINK:(.*?)\|(.*?)$$\]/g, function(match, label, url) {
         var token = '%%LINK' + placeholders.length + '%%';
         placeholders.push('<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
         return token;
@@ -778,6 +798,32 @@
       return html;
     }
 
+    function insertLink() {
+      var textarea = document.getElementById('rawContent');
+      var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+      var linkText = prompt('Enter the text to display for the link:', selectedText || '');
+      if (linkText === null || linkText.trim() === '') return;
+
+      var url = prompt('Enter the full URL (include https://):', 'https://');
+      if (url === null || url.trim() === '') return;
+
+      url = url.trim();
+      if (!/^https?:\/\//i.test(url) && !/^mailto:/i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      var linkToken = '[[LINK:' + linkText.replace(/\|/g, '') + '|' + url.replace(/\]/g, '') + ']]';
+      var start = textarea.selectionStart;
+      var end = textarea.selectionEnd;
+      var text = textarea.value;
+
+      textarea.value = text.substring(0, start) + linkToken + text.substring(end);
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + linkToken.length;
+
+      updatePreview();
+    }
+
     function buildPrintDocument() {
       var title = document.getElementById('annTitle').value.trim() || 'Your Announcement Title';
       var docType = document.getElementById('docType').value;
@@ -792,7 +838,7 @@
           <div class="signature-block">
             <p class="sincerely">Sincerely,</p>
             <p class="sig-name">${escapeHTML(sigName)}</p>
-            ${sigTitle ? `<p class="sig-title">${escapeHTML(sigTitle)}</p>` : ''}
+            ${sigTitle ? `<p class="sig-title">${escapeHTML(sigTitle.toUpperCase())}</p>` : ''}
           </div>
         `;
       }
@@ -813,26 +859,21 @@
     --white:#fff;
     --border:#dde0ea;
   }
-
   * { box-sizing:border-box; }
-
   html, body {
     margin: 0;
     padding: 0;
     background: white;
     font-family: 'Noto Sans', sans-serif;
   }
-
   @page {
     size: letter portrait;
     margin: 0;
   }
-
   .print-shell {
     width: 8.5in;
     margin: 0 auto;
   }
-
   .page {
     width: 8.5in;
     min-height: 11in;
@@ -844,12 +885,10 @@
     break-after: page;
     background: white;
   }
-
   .page:last-child {
     page-break-after: auto;
     break-after: auto;
   }
-
   .page-header {
     background: var(--navy);
     padding: 22px 32px 18px;
@@ -857,12 +896,10 @@
     align-items: center;
     gap: 18px;
   }
-
   .page-header.simple {
     padding: 12px 32px;
     gap: 12px;
   }
-
   .page-header-logo {
     height: 62px;
     min-width: 72px;
@@ -871,35 +908,29 @@
     justify-content: center;
     flex-shrink: 0;
   }
-
   .page-header.simple .page-header-logo {
     height: 36px;
     min-width: 46px;
   }
-
   .page-header-logo img {
     height: 62px;
     max-width: 120px;
     object-fit: contain;
     display: block;
   }
-
   .page-header.simple .page-header-logo img {
     height: 36px;
     max-width: 72px;
   }
-
   .school-name {
     font-size: 1.45rem;
     font-weight: 700;
     color: #fff;
     line-height: 1.1;
   }
-
   .page-header.simple .school-name {
     font-size: 1rem;
   }
-
   .school-tagline {
     font-size: .72rem;
     color: var(--gold);
@@ -908,16 +939,13 @@
     margin-top: 3px;
     opacity: .85;
   }
-
   .page-header.simple .school-tagline {
     font-size: .62rem;
   }
-
   .accent-bar {
     height: 6px;
     background: linear-gradient(90deg, var(--gold) 0%, var(--orange) 100%);
   }
-
   .doc-type-row {
     background: var(--gold);
     padding: 5px 32px;
@@ -925,7 +953,6 @@
     justify-content: space-between;
     align-items: center;
   }
-
   .doc-type-label {
     font-size: .7rem;
     font-weight: 700;
@@ -933,19 +960,16 @@
     letter-spacing: .12em;
     color: var(--navy);
   }
-
   .doc-date {
     font-size: .7rem;
     color: var(--navy);
     opacity: .75;
   }
-
   .page-body {
-    padding: 30px 36px 36px;
+    padding: 30px 56px 36px;
     flex: 1;
     overflow: hidden;
   }
-
   .announcement-title {
     font-family: 'Noto Serif', serif;
     font-size: 1.6rem;
@@ -953,7 +977,6 @@
     margin-bottom: 6px;
     line-height: 1.2;
   }
-
   .title-rule {
     width: 54px;
     height: 4px;
@@ -961,13 +984,11 @@
     border-radius: 2px;
     margin-bottom: 22px;
   }
-
   .content {
     font-size: .875rem;
     color: var(--black);
     line-height: 1.75;
   }
-
   .content p { margin: 0 0 14px; }
   .content h2 {
     font-size: 1rem;
@@ -1035,7 +1056,6 @@
     padding: 6px 10px;
     border-bottom: 1px solid #dde0ea;
   }
-
   .signature-block {
     margin-top: 48px;
   }
@@ -1062,8 +1082,9 @@
     color: #666;
     margin-top: 2px;
     padding-left: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0;
   }
-
   .page-footer {
     background: var(--navy);
     padding: 10px 32px;
@@ -1072,19 +1093,16 @@
     align-items: center;
     margin-top: auto;
   }
-
   .footer-text {
     font-size: .65rem;
     color: rgba(255,255,255,.45);
   }
-
   .footer-accent {
     width: 28px;
     height: 3px;
     background: var(--gold);
     border-radius: 2px;
   }
-
   .measure {
     position: absolute;
     left: -99999px;
