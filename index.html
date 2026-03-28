@@ -545,9 +545,8 @@
         <label>Paste Your Content</label>
         <textarea id="rawContent"></textarea>
         <p class="hint">
-          Supports plain text, basic Markdown shortcuts, pipe-separated tables, and hyperlinks.<br>
-          Use links like: <strong>[School Website](https://example.com)</strong><br>
-          You can also paste full URLs like: <strong>https://example.com</strong>
+          Hyperlink text format: <strong>[HERE](https://example.com)</strong><br>
+          Standalone URLs will also auto-link if pasted by themselves.
         </p>
       </div>
 
@@ -647,7 +646,7 @@
       var sigTitle = document.getElementById('sigTitle');
 
       docDate.valueAsDate = new Date();
-      rawContent.placeholder = 'Paste your text here...\n\nTips:\n- Lines ending with : become headers\n- Lines starting with - become bullets\n- Use **bold** for bold text\n- Lines starting with 1. become numbered circles\n- Prefix a line with ! for a callout box\n- Add links like [School Website](https://example.com)\n- Or paste full URLs like https://example.com';
+      rawContent.placeholder = 'Paste your text here...\n\nTips:\n- Use [HERE](https://example.com) for linked words\n- Standalone URLs like https://example.com will auto-link\n- Lines ending with : become headers\n- Lines starting with - become bullets\n- Use **bold** for bold text\n- Lines starting with 1. become numbered circles\n- Prefix a line with ! for a callout box';
 
       annTitle.addEventListener('input', updatePreview);
       docType.addEventListener('change', updatePreview);
@@ -720,29 +719,27 @@
     }
 
     function formatInline(text) {
-      var placeholders = [];
+      var protectedLinks = [];
       var safeText = escapeHTML(text);
 
       safeText = safeText.replace(/$$([^$$]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/gi, function(match, label, url) {
-        var token = '%%LINK' + placeholders.length + '%%';
-        placeholders.push('<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+        var token = '@@MDLINK' + protectedLinks.length + '@@';
+        protectedLinks.push('<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
         return token;
       });
 
-      safeText = safeText.replace(/(^|[\s(>])((https?:\/\/[^\s<]+))/gi, function(match, prefix, url) {
+      safeText = safeText.replace(/(^|[\s(>])((https?:\/\/[^\s<\]]+))/gi, function(match, prefix, url) {
         var cleanUrl = url.replace(/[.,!?;:]+$/, '');
         var trailing = url.slice(cleanUrl.length);
-        var token = '%%LINK' + placeholders.length + '%%';
-        placeholders.push('<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer">' + cleanUrl + '</a>');
-        return prefix + token + trailing;
+        return prefix + '<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer">' + cleanUrl + '</a>' + trailing;
       });
 
       safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>');
       safeText = safeText.replace(/\*(.*?)\*/g, '<em>\$1</em>');
       safeText = safeText.replace(/`(.*?)`/g, '<code>\$1</code>');
 
-      safeText = safeText.replace(/%%LINK(\d+)%%/g, function(match, index) {
-        return placeholders[Number(index)];
+      safeText = safeText.replace(/@@MDLINK(\d+)@@/g, function(match, index) {
+        return protectedLinks[Number(index)];
       });
 
       return safeText;
