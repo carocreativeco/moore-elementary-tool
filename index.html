@@ -289,7 +289,7 @@ margin-bottom: 14px;
 }
 .doc-content ol li {
 display: flex;
-align-items: flex-start;
+align-items: center;
 gap: 12px;
 margin-bottom: 10px;
 line-height: 1.5;
@@ -448,21 +448,10 @@ bottom: 0; left: 0; right: 0;
 
 <div class="panel-section">
   <label>Paste Your Content</label>
-  <textarea id="rawContent" placeholder="Paste your text here…
-```
-
-Tips for formatting:
-• Lines ending with : become section headers
-• Lines starting with - or * become bullet points
-• Wrap text in **bold** for bold
-• Use | col | col | rows for tables
-• Prefix a line with ! for a callout box
-• Lines starting with 1. 2. 3. become navy circle numbers”
-oninput=“updatePreview()”></textarea>
-<p class="hint">Supports plain text, basic Markdown-style shortcuts, and pipe-separated tables.</p>
+  <textarea id="rawContent" oninput="updatePreview()"></textarea>
+  <p class="hint">Supports plain text, basic Markdown-style shortcuts, and pipe-separated tables.</p>
 </div>
 
-```
 <div class="panel-section">
   <label>Signature Name</label>
   <input type="text" id="sigName" placeholder="e.g. Mrs. Johnson" oninput="updatePreview()" />
@@ -539,6 +528,17 @@ oninput=“updatePreview()”></textarea>
   // Set today's date as default
   const today = new Date();
   document.getElementById('docDate').valueAsDate = today;
+  document.getElementById('rawContent').placeholder = [
+    'Paste your text here...',
+    '',
+    'Tips for formatting:',
+    '- Lines ending with : become section headers',
+    '- Lines starting with - or * become bullet points',
+    '- Wrap text in **bold** for bold',
+    '- Use | col | col | rows for tables',
+    '- Prefix a line with ! for a callout box',
+    '- Lines starting with 1. 2. 3. become navy circle numbers'
+  ].join('\n');
   updatePreview();
 
   let logoDataURL = null;
@@ -680,7 +680,7 @@ oninput=“updatePreview()”></textarea>
       if (/^\d+[.)]\s/.test(trimmed)) {
         if (!inList || listType !== 'ol') { flushList(); html += '<ol>'; inList = true; listType = 'ol'; olCounter = 0; }
         olCounter++;
-        html += `<li><span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#0c1546;color:#ffc200;font-family:'Noto Sans',sans-serif;font-weight:700;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;margin-top:1px;">${olCounter}</span><span>${formatInline(trimmed.replace(/^\d+[.)]\s/, ''))}</span></li>`;
+        html += `<li><span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#0c1546;color:#ffc200;font-family:'Noto Sans',sans-serif;font-weight:700;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;">${olCounter}</span><span>${formatInline(trimmed.replace(/^\d+[.)]\s/, ''))}</span></li>`;
         return;
       }
 
