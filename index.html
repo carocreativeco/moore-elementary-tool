@@ -109,28 +109,31 @@
       line-height: 1.6;
     }
 
-    .link-tools {
-      display: flex;
+    .link-builder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
       margin-bottom: 10px;
-      flex-wrap: wrap;
+    }
+
+    .link-builder .full {
+      grid-column: 1 / -1;
     }
 
     .mini-btn {
-      border: 1px solid var(--border);
-      background: var(--white);
-      color: var(--navy);
+      border: none;
+      background: var(--navy);
+      color: var(--white);
       font-family: 'Noto Sans', sans-serif;
       font-size: .78rem;
       font-weight: 700;
       border-radius: 6px;
-      padding: 8px 10px;
+      padding: 9px 10px;
       cursor: pointer;
     }
 
     .mini-btn:hover {
-      background: #f8f9fc;
-      border-color: var(--navy);
+      opacity: .9;
     }
 
     .actions {
@@ -525,12 +528,26 @@
       </div>
 
       <div class="panel-section">
-        <label>Paste Your Content</label>
-        <div class="link-tools">
-          <button type="button" class="mini-btn" onclick="insertLink()">Insert Link</button>
+        <label>Link Builder</label>
+        <div class="link-builder">
+          <input type="text" id="linkText" placeholder="Link text (e.g. HERE)" />
+          <input type="text" id="linkURL" placeholder="URL (e.g. https://example.com)" />
+          <button type="button" class="mini-btn full" onclick="insertLink()">Insert Link Into Content</button>
         </div>
+        <p class="hint">Place your cursor in the content box where you want the link to go, then use this builder.</p>
+      </div>
+
+      <div class="panel-section">
+        <label>Paste Your Content</label>
         <textarea id="rawContent"></textarea>
-        <p class="hint">Use the Insert Link button to add linked text directly into your content.</p>
+        <p class="hint">
+          Formatting tips:<br>
+          - Lines ending with <strong>:</strong> become section headers<br>
+          - Lines starting with <strong>-</strong> become bullets<br>
+          - Lines starting with <strong>1.</strong> become numbered items<br>
+          - Use <strong>**bold**</strong> for bold text<br>
+          - Start a line with <strong>!</strong> for a callout box
+        </p>
       </div>
 
       <div class="panel-section">
@@ -605,11 +622,13 @@
     document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('docDate').valueAsDate = new Date();
       document.getElementById('rawContent').placeholder =
-        'Paste your text here...\n\nExample:\nReady to get involved? Click HERE';
+        'Paste your text here...\n\nHello families,\n\nImportant Updates:\n- First item\n- Second item\n\n! This is a callout message';
+
       ['annTitle', 'docType', 'docDate', 'rawContent', 'sigName', 'sigTitle'].forEach(function(id) {
         var el = document.getElementById(id);
         el.addEventListener(id === 'docType' ? 'change' : 'input', updatePreview);
       });
+
       updatePreview();
     });
 
@@ -678,7 +697,7 @@
 
       escaped = escaped.replace(/$$\[LINK:(.*?)\|(.*?)$$\]/g, function(match, label, url) {
         var token = '%%LINK' + placeholders.length + '%%';
-        placeholders.push('<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+        placeholders.push('<a href="' + escapeAttribute(url) + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
         return token;
       });
 
@@ -691,6 +710,14 @@
       });
 
       return escaped;
+    }
+
+    function escapeAttribute(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     function parseContent(text) {
@@ -799,27 +826,43 @@
     }
 
     function insertLink() {
+      var textInput = document.getElementById('linkText');
+      var urlInput = document.getElementById('linkURL');
       var textarea = document.getElementById('rawContent');
-      var selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
-      var linkText = prompt('Enter the text to display for the link:', selectedText || '');
-      if (linkText === null || linkText.trim() === '') return;
 
-      var url = prompt('Enter the full URL (include https://):', 'https://');
-      if (url === null || url.trim() === '') return;
+      var linkText = textInput.value.trim();
+      var linkURL = urlInput.value.trim();
 
-      url = url.trim();
-      if (!/^https?:\/\//i.test(url) && !/^mailto:/i.test(url)) {
-        url = 'https://' + url;
+      if (!linkText) {
+        alert('Please enter link text.');
+        textInput.focus();
+        return;
       }
 
-      var linkToken = '[[LINK:' + linkText.replace(/\|/g, '') + '|' + url.replace(/\]/g, '') + ']]';
+      if (!linkURL) {
+        alert('Please enter a URL.');
+        urlInput.focus();
+        return;
+      }
+
+      if (!/^https?:\/\//i.test(linkURL) && !/^mailto:/i.test(linkURL)) {
+        linkURL = 'https://' + linkURL;
+      }
+
+      var safeText = linkText.replace(/\|/g, '');
+      var safeURL = linkURL.replace(/\]/g, '');
+      var token = '[[LINK:' + safeText + '|' + safeURL + ']]';
+
       var start = textarea.selectionStart;
       var end = textarea.selectionEnd;
-      var text = textarea.value;
+      var value = textarea.value;
 
-      textarea.value = text.substring(0, start) + linkToken + text.substring(end);
+      textarea.value = value.substring(0, start) + token + value.substring(end);
       textarea.focus();
-      textarea.selectionStart = textarea.selectionEnd = start + linkToken.length;
+      textarea.selectionStart = textarea.selectionEnd = start + token.length;
+
+      textInput.value = '';
+      urlInput.value = '';
 
       updatePreview();
     }
@@ -834,343 +877,205 @@
 
       var signatureHTML = '';
       if (sigName) {
-        signatureHTML = `
-          <div class="signature-block">
-            <p class="sincerely">Sincerely,</p>
-            <p class="sig-name">${escapeHTML(sigName)}</p>
-            ${sigTitle ? `<p class="sig-title">${escapeHTML(sigTitle.toUpperCase())}</p>` : ''}
-          </div>
-        `;
+        signatureHTML =
+          '<div class="signature-block">' +
+            '<p class="sincerely">Sincerely,</p>' +
+            '<p class="sig-name">' + escapeHTML(sigName) + '</p>' +
+            (sigTitle ? '<p class="sig-title">' + escapeHTML(sigTitle.toUpperCase()) + '</p>' : '') +
+          '</div>';
       }
 
+      var printHTML =
+'<!DOCTYPE html>' +
+'<html lang="en">' +
+'<head>' +
+'<meta charset="UTF-8">' +
+'<title>' + escapeHTML(title) + '</title>' +
+'<link href="https://fonts.googleapis.com/css2?family=Baskervville&family=Baskervville+SC&family=Noto+Sans:wght@400;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />' +
+'<style>' +
+'  :root{--gold:#ffc200;--orange:#db6d42;--navy:#0c1546;--border:#dde0ea;}' +
+'  *{box-sizing:border-box;}' +
+'  html,body{margin:0;padding:0;background:#fff;font-family:"Noto Sans",sans-serif;}' +
+'  @page{size:letter portrait;margin:0;}' +
+'  .print-shell{width:8.5in;margin:0 auto;}' +
+'  .page{width:8.5in;height:11in;display:flex;flex-direction:column;overflow:hidden;page-break-after:always;break-after:page;background:#fff;}' +
+'  .page:last-child{page-break-after:auto;break-after:auto;}' +
+'  .page-header{background:var(--navy);padding:22px 32px 18px;display:flex;align-items:center;gap:18px;}' +
+'  .page-header.simple{padding:12px 32px;gap:12px;}' +
+'  .page-header-logo{height:62px;min-width:72px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}' +
+'  .page-header.simple .page-header-logo{height:36px;min-width:46px;}' +
+'  .page-header-logo img{height:62px;max-width:120px;object-fit:contain;display:block;}' +
+'  .page-header.simple .page-header-logo img{height:36px;max-width:72px;}' +
+'  .school-name{font-size:1.45rem;font-weight:700;color:#fff;line-height:1.1;}' +
+'  .page-header.simple .school-name{font-size:1rem;}' +
+'  .school-tagline{font-size:.72rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-top:3px;opacity:.85;}' +
+'  .page-header.simple .school-tagline{font-size:.62rem;}' +
+'  .accent-bar{height:6px;background:linear-gradient(90deg,var(--gold) 0%,var(--orange) 100%);}' +
+'  .doc-type-row{background:var(--gold);padding:5px 32px;display:flex;justify-content:space-between;align-items:center;}' +
+'  .doc-type-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);}' +
+'  .doc-date{font-size:.7rem;color:var(--navy);opacity:.75;}' +
+'  .page-body{padding:30px 56px 36px;flex:1;overflow:hidden;}' +
+'  .announcement-title{font-family:"Noto Serif",serif;font-size:1.6rem;color:var(--navy);margin-bottom:6px;line-height:1.2;}' +
+'  .title-rule{width:54px;height:4px;background:var(--orange);border-radius:2px;margin-bottom:22px;}' +
+'  .content{font-size:.875rem;color:#000;line-height:1.75;}' +
+'  .content p{margin:0 0 14px;}' +
+'  .content h2{font-size:1rem;font-weight:700;color:var(--navy);margin:22px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--gold);}' +
+'  .content h3{font-size:.9rem;font-weight:600;color:var(--orange);margin:16px 0 4px;}' +
+'  .content ul{padding-left:20px;margin:0 0 14px;}' +
+'  .content ul li{margin-bottom:4px;}' +
+'  .content ol{list-style:none;padding-left:0;margin:0 0 14px;}' +
+'  .content ol li{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;line-height:1.5;}' +
+'  .content a{color:var(--navy);font-weight:700;text-decoration:underline;word-break:break-word;}' +
+'  .content strong{font-weight:700;color:var(--navy);}' +
+'  .content .callout{background:#fffbeb;border-left:4px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:.84rem;}' +
+'  .content table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.82rem;}' +
+'  .content th{background:var(--navy);color:#fff;text-align:left;padding:7px 10px;font-size:.78rem;}' +
+'  .content td{padding:6px 10px;border-bottom:1px solid #dde0ea;}' +
+'  .signature-block{margin-top:48px;}' +
+'  .sincerely{font-family:"Baskervville",serif;font-size:1rem;color:#000;border-top:1.5px solid #dde0ea;padding-top:10px;display:inline-block;min-width:200px;margin-bottom:6px;}' +
+'  .sig-name{font-family:"Baskervville",serif;font-style:italic;font-size:1.1rem;color:var(--navy);display:block;padding-left:2px;}' +
+'  .sig-title{font-size:.82rem;color:#666;margin-top:2px;padding-left:2px;text-transform:uppercase;letter-spacing:0;}' +
+'  .page-footer{background:var(--navy);padding:10px 32px;display:flex;justify-content:space-between;align-items:center;margin-top:auto;}' +
+'  .footer-text{font-size:.65rem;color:rgba(255,255,255,.45);}' +
+'  .footer-accent{width:28px;height:3px;background:var(--gold);border-radius:2px;}' +
+'  .measure{position:absolute;left:-99999px;top:0;width:8.5in;height:11in;overflow:hidden;visibility:hidden;}' +
+'</style>' +
+'</head>' +
+'<body>' +
+'<div class="print-shell" id="printShell"></div>' +
+'<div class="measure" id="measure"></div>' +
+'<script>' +
+'(function(){' +
+'var title=' + JSON.stringify(title) + ';' +
+'var docType=' + JSON.stringify(docType) + ';' +
+'var dateText=' + JSON.stringify(dateText) + ';' +
+'var contentHTML=' + JSON.stringify(contentHTML) + ';' +
+'var signatureHTML=' + JSON.stringify(signatureHTML) + ';' +
+
+'function header(simple){return ' + JSON.stringify(
+  '<div class="page-header${SIMPLE}">' +
+    '<div class="page-header-logo"><img src="moore-tool.png" alt="Moore Elementary Logo"></div>' +
+    '<div><div class="school-name">Moore Elementary School</div><div class="school-tagline">${TAG}</div></div>' +
+  '</div>' +
+  '<div class="accent-bar"></div>' +
+  '<div class="doc-type-row"><span class="doc-type-label">${DOCTYPE}</span><span class="doc-date">${DATE}</span></div>'
+) + '.replace("${SIMPLE}", simple ? " simple" : "").replace("${TAG}", simple ? title : docType).replace("${DOCTYPE}", docType).replace("${DATE}", dateText);}' +
+
+'function footer(){return ' + JSON.stringify(
+  '<div class="page-footer"><span class="footer-text">Moore Elementary School &nbsp;&bull;&nbsp; Official Communication</span><div class="footer-accent"></div></div>'
+) + ';}' +
+
+'function skeleton(firstPage, includeSignature){' +
+'return \'<div class="page">\'+header(!firstPage)+\'<div class="page-body">\'+(firstPage ? \'<div class="announcement-title>\' : \'\');' +
+'}' +
+'})();' +
+'</script>' +
+'</body>' +
+'</html>';
+
+      return buildPrintHTML(title, docType, dateText, contentHTML, signatureHTML);
+    }
+
+    function buildPrintHTML(title, docType, dateText, contentHTML, signatureHTML) {
       return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>${title}</title>
+<title>${escapeHTML(title)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Baskervville&family=Baskervville+SC&family=Noto+Sans:wght@400;600;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
 <style>
-  :root {
-    --gold:#ffc200;
-    --orange:#db6d42;
-    --navy:#0c1546;
-    --black:#000;
-    --white:#fff;
-    --border:#dde0ea;
-  }
-  * { box-sizing:border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: white;
-    font-family: 'Noto Sans', sans-serif;
-  }
-  @page {
-    size: letter portrait;
-    margin: 0;
-  }
-  .print-shell {
-    width: 8.5in;
-    margin: 0 auto;
-  }
-  .page {
-    width: 8.5in;
-    min-height: 11in;
-    height: 11in;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    page-break-after: always;
-    break-after: page;
-    background: white;
-  }
-  .page:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
-  .page-header {
-    background: var(--navy);
-    padding: 22px 32px 18px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  .page-header.simple {
-    padding: 12px 32px;
-    gap: 12px;
-  }
-  .page-header-logo {
-    height: 62px;
-    min-width: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .page-header.simple .page-header-logo {
-    height: 36px;
-    min-width: 46px;
-  }
-  .page-header-logo img {
-    height: 62px;
-    max-width: 120px;
-    object-fit: contain;
-    display: block;
-  }
-  .page-header.simple .page-header-logo img {
-    height: 36px;
-    max-width: 72px;
-  }
-  .school-name {
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.1;
-  }
-  .page-header.simple .school-name {
-    font-size: 1rem;
-  }
-  .school-tagline {
-    font-size: .72rem;
-    color: var(--gold);
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-top: 3px;
-    opacity: .85;
-  }
-  .page-header.simple .school-tagline {
-    font-size: .62rem;
-  }
-  .accent-bar {
-    height: 6px;
-    background: linear-gradient(90deg, var(--gold) 0%, var(--orange) 100%);
-  }
-  .doc-type-row {
-    background: var(--gold);
-    padding: 5px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .doc-type-label {
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    color: var(--navy);
-  }
-  .doc-date {
-    font-size: .7rem;
-    color: var(--navy);
-    opacity: .75;
-  }
-  .page-body {
-    padding: 30px 56px 36px;
-    flex: 1;
-    overflow: hidden;
-  }
-  .announcement-title {
-    font-family: 'Noto Serif', serif;
-    font-size: 1.6rem;
-    color: var(--navy);
-    margin-bottom: 6px;
-    line-height: 1.2;
-  }
-  .title-rule {
-    width: 54px;
-    height: 4px;
-    background: var(--orange);
-    border-radius: 2px;
-    margin-bottom: 22px;
-  }
-  .content {
-    font-size: .875rem;
-    color: var(--black);
-    line-height: 1.75;
-  }
-  .content p { margin: 0 0 14px; }
-  .content h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--navy);
-    margin: 22px 0 6px;
-    padding-bottom: 4px;
-    border-bottom: 2px solid var(--gold);
-  }
-  .content h3 {
-    font-size: .9rem;
-    font-weight: 600;
-    color: var(--orange);
-    margin: 16px 0 4px;
-  }
-  .content ul {
-    padding-left: 20px;
-    margin: 0 0 14px;
-  }
-  .content ul li { margin-bottom: 4px; }
-  .content ol {
-    list-style: none;
-    padding-left: 0;
-    margin: 0 0 14px;
-  }
-  .content ol li {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 10px;
-    line-height: 1.5;
-  }
-  .content a {
-    color: var(--navy);
-    font-weight: 700;
-    text-decoration: underline;
-    word-break: break-word;
-  }
-  .content strong {
-    font-weight: 700;
-    color: var(--navy);
-  }
-  .content .callout {
-    background: #fffbeb;
-    border-left: 4px solid var(--gold);
-    padding: 10px 14px;
-    border-radius: 0 6px 6px 0;
-    margin: 14px 0;
-    font-size: .84rem;
-  }
-  .content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 14px 0;
-    font-size: .82rem;
-  }
-  .content th {
-    background: var(--navy);
-    color: white;
-    text-align: left;
-    padding: 7px 10px;
-    font-size: .78rem;
-  }
-  .content td {
-    padding: 6px 10px;
-    border-bottom: 1px solid #dde0ea;
-  }
-  .signature-block {
-    margin-top: 48px;
-  }
-  .sincerely {
-    font-family: 'Baskervville', serif;
-    font-size: 1rem;
-    color: #000;
-    border-top: 1.5px solid #dde0ea;
-    padding-top: 10px;
-    display: inline-block;
-    min-width: 200px;
-    margin-bottom: 6px;
-  }
-  .sig-name {
-    font-family: 'Baskervville', serif;
-    font-style: italic;
-    font-size: 1.1rem;
-    color: var(--navy);
-    display: block;
-    padding-left: 2px;
-  }
-  .sig-title {
-    font-size: .82rem;
-    color: #666;
-    margin-top: 2px;
-    padding-left: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0;
-  }
-  .page-footer {
-    background: var(--navy);
-    padding: 10px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-  }
-  .footer-text {
-    font-size: .65rem;
-    color: rgba(255,255,255,.45);
-  }
-  .footer-accent {
-    width: 28px;
-    height: 3px;
-    background: var(--gold);
-    border-radius: 2px;
-  }
-  .measure {
-    position: absolute;
-    left: -99999px;
-    top: 0;
-    width: 8.5in;
-    height: 11in;
-    overflow: hidden;
-    visibility: hidden;
-  }
+  :root{--gold:#ffc200;--orange:#db6d42;--navy:#0c1546;--border:#dde0ea;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#fff;font-family:"Noto Sans",sans-serif;}
+  @page{size:letter portrait;margin:0;}
+  .print-shell{width:8.5in;margin:0 auto;}
+  .page{width:8.5in;height:11in;display:flex;flex-direction:column;overflow:hidden;page-break-after:always;break-after:page;background:#fff;}
+  .page:last-child{page-break-after:auto;break-after:auto;}
+  .page-header{background:var(--navy);padding:22px 32px 18px;display:flex;align-items:center;gap:18px;}
+  .page-header.simple{padding:12px 32px;gap:12px;}
+  .page-header-logo{height:62px;min-width:72px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .page-header.simple .page-header-logo{height:36px;min-width:46px;}
+  .page-header-logo img{height:62px;max-width:120px;object-fit:contain;display:block;}
+  .page-header.simple .page-header-logo img{height:36px;max-width:72px;}
+  .school-name{font-size:1.45rem;font-weight:700;color:#fff;line-height:1.1;}
+  .page-header.simple .school-name{font-size:1rem;}
+  .school-tagline{font-size:.72rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-top:3px;opacity:.85;}
+  .page-header.simple .school-tagline{font-size:.62rem;}
+  .accent-bar{height:6px;background:linear-gradient(90deg,var(--gold) 0%,var(--orange) 100%);}
+  .doc-type-row{background:var(--gold);padding:5px 32px;display:flex;justify-content:space-between;align-items:center;}
+  .doc-type-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);}
+  .doc-date{font-size:.7rem;color:var(--navy);opacity:.75;}
+  .page-body{padding:30px 56px 36px;flex:1;overflow:hidden;}
+  .announcement-title{font-family:"Noto Serif",serif;font-size:1.6rem;color:var(--navy);margin-bottom:6px;line-height:1.2;}
+  .title-rule{width:54px;height:4px;background:var(--orange);border-radius:2px;margin-bottom:22px;}
+  .content{font-size:.875rem;color:#000;line-height:1.75;}
+  .content p{margin:0 0 14px;}
+  .content h2{font-size:1rem;font-weight:700;color:var(--navy);margin:22px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--gold);}
+  .content h3{font-size:.9rem;font-weight:600;color:var(--orange);margin:16px 0 4px;}
+  .content ul{padding-left:20px;margin:0 0 14px;}
+  .content ul li{margin-bottom:4px;}
+  .content ol{list-style:none;padding-left:0;margin:0 0 14px;}
+  .content ol li{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;line-height:1.5;}
+  .content a{color:var(--navy);font-weight:700;text-decoration:underline;word-break:break-word;}
+  .content strong{font-weight:700;color:var(--navy);}
+  .content .callout{background:#fffbeb;border-left:4px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:.84rem;}
+  .content table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.82rem;}
+  .content th{background:var(--navy);color:#fff;text-align:left;padding:7px 10px;font-size:.78rem;}
+  .content td{padding:6px 10px;border-bottom:1px solid #dde0ea;}
+  .signature-block{margin-top:48px;}
+  .sincerely{font-family:"Baskervville",serif;font-size:1rem;color:#000;border-top:1.5px solid #dde0ea;padding-top:10px;display:inline-block;min-width:200px;margin-bottom:6px;}
+  .sig-name{font-family:"Baskervville",serif;font-style:italic;font-size:1.1rem;color:var(--navy);display:block;padding-left:2px;}
+  .sig-title{font-size:.82rem;color:#666;margin-top:2px;padding-left:2px;text-transform:uppercase;letter-spacing:0;}
+  .page-footer{background:var(--navy);padding:10px 32px;display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
+  .footer-text{font-size:.65rem;color:rgba(255,255,255,.45);}
+  .footer-accent{width:28px;height:3px;background:var(--gold);border-radius:2px;}
+  .measure{position:absolute;left:-99999px;top:0;width:8.5in;height:11in;overflow:hidden;visibility:hidden;}
 </style>
 </head>
 <body>
-  <div class="print-shell" id="printShell"></div>
-  <div class="measure" id="measure"></div>
+<div class="print-shell" id="printShell"></div>
+<div class="measure" id="measure"></div>
 
 <script>
-(function() {
+(function(){
   var title = ${JSON.stringify(title)};
   var docType = ${JSON.stringify(docType)};
   var dateText = ${JSON.stringify(dateText)};
   var contentHTML = ${JSON.stringify(contentHTML)};
   var signatureHTML = ${JSON.stringify(signatureHTML)};
 
-  function header(simple) {
-    return \`
-      <div class="page-header\${simple ? ' simple' : ''}">
-        <div class="page-header-logo">
-          <img src="moore-tool.png" alt="Moore Elementary Logo">
-        </div>
-        <div>
-          <div class="school-name">Moore Elementary School</div>
-          <div class="school-tagline">\${simple ? title : docType}</div>
-        </div>
-      </div>
-      <div class="accent-bar"></div>
-      <div class="doc-type-row">
-        <span class="doc-type-label">\${docType}</span>
-        <span class="doc-date">\${dateText}</span>
-      </div>
-    \`;
+  function header(simple){
+    return ''
+      + '<div class="page-header' + (simple ? ' simple' : '') + '">'
+      +   '<div class="page-header-logo"><img src="moore-tool.png" alt="Moore Elementary Logo"></div>'
+      +   '<div><div class="school-name">Moore Elementary School</div><div class="school-tagline">' + (simple ? title : docType) + '</div></div>'
+      + '</div>'
+      + '<div class="accent-bar"></div>'
+      + '<div class="doc-type-row"><span class="doc-type-label">' + docType + '</span><span class="doc-date">' + dateText + '</span></div>';
   }
 
-  function footer() {
-    return \`
-      <div class="page-footer">
-        <span class="footer-text">Moore Elementary School &nbsp;&bull;&nbsp; Official Communication</span>
-        <div class="footer-accent"></div>
-      </div>
-    \`;
+  function footer(){
+    return '<div class="page-footer"><span class="footer-text">Moore Elementary School &nbsp;&bull;&nbsp; Official Communication</span><div class="footer-accent"></div></div>';
   }
 
-  function skeleton(firstPage, includeSignature) {
-    return \`
-      <div class="page">
-        \${header(!firstPage)}
-        <div class="page-body">
-          \${firstPage ? '<div class="announcement-title">' + title + '</div><div class="title-rule"></div>' : ''}
-          <div class="content" id="flow"></div>
-          \${includeSignature ? signatureHTML : ''}
-        </div>
-        \${footer()}
-      </div>
-    \`;
+  function skeleton(firstPage, includeSignature){
+    return ''
+      + '<div class="page">'
+      + header(!firstPage)
+      + '<div class="page-body">'
+      + (firstPage ? '<div class="announcement-title">' + title + '</div><div class="title-rule"></div>' : '')
+      + '<div class="content" id="flow"></div>'
+      + (includeSignature ? signatureHTML : '')
+      + '</div>'
+      + footer()
+      + '</div>';
   }
 
   var source = document.createElement('div');
   source.innerHTML = contentHTML;
-  var nodes = Array.from(source.childNodes).filter(function(n) {
+
+  var nodes = Array.from(source.childNodes).filter(function(n){
     return !(n.nodeType === 3 && !n.textContent.trim());
   });
 
@@ -1178,17 +1083,17 @@
   var measure = document.getElementById('measure');
   var pageNum = 1;
 
-  while (nodes.length) {
+  while(nodes.length){
     measure.innerHTML = skeleton(pageNum === 1, false);
     var flow = measure.querySelector('#flow');
     var body = measure.querySelector('.page-body');
-
     var pageNodes = [];
-    while (nodes.length) {
+
+    while(nodes.length){
       var testNode = nodes[0].cloneNode(true);
       flow.appendChild(testNode);
 
-      if (body.scrollHeight > body.clientHeight) {
+      if(body.scrollHeight > body.clientHeight){
         flow.removeChild(testNode);
         break;
       } else {
@@ -1196,7 +1101,7 @@
       }
     }
 
-    if (!pageNodes.length && nodes.length) {
+    if(!pageNodes.length && nodes.length){
       pageNodes.push(nodes.shift());
     }
 
@@ -1206,14 +1111,14 @@
     flow = measure.querySelector('#flow');
     body = measure.querySelector('.page-body');
 
-    pageNodes.forEach(function(n) {
+    pageNodes.forEach(function(n){
       flow.appendChild(n.cloneNode(true));
     });
 
-    if (isLast && signatureHTML && body.scrollHeight > body.clientHeight) {
+    if(isLast && signatureHTML && body.scrollHeight > body.clientHeight){
       measure.innerHTML = skeleton(pageNum === 1, false);
       flow = measure.querySelector('#flow');
-      pageNodes.forEach(function(n) {
+      pageNodes.forEach(function(n){
         flow.appendChild(n.cloneNode(true));
       });
       shell.insertAdjacentHTML('beforeend', measure.innerHTML);
@@ -1228,12 +1133,12 @@
     pageNum++;
   }
 
-  if (!shell.innerHTML.trim()) {
+  if(!shell.innerHTML.trim()){
     shell.innerHTML = skeleton(true, !!signatureHTML);
     shell.querySelector('#flow').innerHTML = contentHTML;
   }
 
-  setTimeout(function() {
+  setTimeout(function(){
     window.print();
   }, 300);
 })();
@@ -1257,6 +1162,8 @@
       document.getElementById('docDate').valueAsDate = new Date();
       document.getElementById('sigName').value = '';
       document.getElementById('sigTitle').value = '';
+      document.getElementById('linkText').value = '';
+      document.getElementById('linkURL').value = '';
       updatePreview();
     }
   </script>
