@@ -437,9 +437,13 @@
     }
 
     .signature-block {
-      margin-top: 48px;
+      margin-top: 24px;
       page-break-inside: avoid;
       break-inside: avoid;
+    }
+
+    .signature-block p {
+      margin-bottom: 0;
     }
 
     .sincerely {
@@ -911,30 +915,31 @@
         document.getElementById('runningDate').textContent = '';
       }
 
-      var sigBlock = document.getElementById('pageSignature');
-      var sigDisplay = document.getElementById('sigDisplay');
-      var sigTitleDisplay = document.getElementById('sigTitleDisplay');
-
-      if (sigName) {
-        sigDisplay.textContent = sigName;
-        sigBlock.style.display = 'block';
-
-        if (sigTitle) {
-          sigTitleDisplay.textContent = sigTitle.toUpperCase();
-          sigTitleDisplay.style.display = 'block';
-        } else {
-          sigTitleDisplay.textContent = '';
-          sigTitleDisplay.style.display = 'none';
-        }
+      // Build content with signature appended
+      var contentHTML = '';
+      
+      if (raw.trim()) {
+        contentHTML = parseContent(raw);
       } else {
-        sigBlock.style.display = 'none';
-        sigTitleDisplay.textContent = '';
-        sigTitleDisplay.style.display = 'none';
+        contentHTML = '<div class="empty-state"><div class="big">&#128196;</div>Paste your content in the left panel<br/>and it will appear here, formatted.</div>';
       }
-
-      document.getElementById('pageContent').innerHTML = raw.trim()
-        ? parseContent(raw)
-        : '<div class="empty-state"><div class="big">&#128196;</div>Paste your content in the left panel<br/>and it will appear here, formatted.</div>';
+      
+      // Append signature to content if sigName exists
+      if (sigName) {
+        var sigHTML = '<div class="signature-block">';
+        sigHTML += '<p class="sincerely">Sincerely,</p>';
+        sigHTML += '<p class="sig-name">' + escapeHTML(sigName) + '</p>';
+        if (sigTitle) {
+          sigHTML += '<p class="sig-title">' + escapeHTML(sigTitle).toUpperCase() + '</p>';
+        }
+        sigHTML += '</div>';
+        contentHTML += sigHTML;
+      }
+      
+      document.getElementById('pageContent').innerHTML = contentHTML;
+      
+      // Hide the original signature block since we're now including it in content
+      document.getElementById('pageSignature').style.display = 'none';
     }
 
     function escapeHTML(text) {
