@@ -877,7 +877,6 @@
         el.addEventListener(id === 'docType' ? 'change' : 'input', updatePreview);
       });
 
-      // QR code position and size listeners
       document.getElementById('qrPosition').addEventListener('change', updateQRPosition);
       document.getElementById('qrSize').addEventListener('change', updateQRSize);
 
@@ -1133,7 +1132,6 @@
       var btn = document.querySelector('.panel-section button[onclick="toggleQRCode()"]');
 
       if (qrContainer.classList.contains('active')) {
-        // Remove QR code
         qrContainer.classList.remove('active');
         qrImage.src = '';
         qrImage.style.display = 'none';
@@ -1147,20 +1145,17 @@
         return;
       }
 
-      // Ensure URL has protocol
       if (!/^https?:\/\//i.test(qrURL)) {
         qrURL = 'https://' + qrURL;
         document.getElementById('qrURL').value = qrURL;
       }
 
-      // Generate QR code using API
       var apiURL = 'https://api.qrserver.com/v1/create-qr-code/?size=' + qrSize + 'x' + qrSize + '&color=0c1546&data=' + encodeURIComponent(qrURL);
       qrImage.src = apiURL;
       qrImage.style.display = 'block';
       qrImage.style.width = qrSize + 'px';
       qrImage.style.height = qrSize + 'px';
 
-      // Update position class
       qrContainer.className = 'qr-code-container active ' + qrPosition;
       
       btn.textContent = 'Remove QR Code';
@@ -1200,7 +1195,6 @@
       document.getElementById('linkURL').value = '';
       document.getElementById('qrURL').value = '';
       
-      // Reset QR code
       var qrContainer = document.getElementById('qrCodeContainer');
       var qrImage = document.getElementById('qrCodeImage');
       var btn = document.querySelector('.panel-section button[onclick="toggleQRCode()"]');
